@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yeni Yılım Sensin</title>
+
+<style>
+body{
+margin:0;
+height:100vh;
+background:radial-gradient(circle at top,#1b2b4f,#000);
+color:#fff;
+font-family:Arial, sans-serif;
+overflow:hidden;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+}
+
+.scene{
+position:absolute;
+opacity:0;
+transition:opacity 1.6s ease;
+padding:20px;
+max-width:90%;
+}
+
+.show{opacity:1}
+.hide{opacity:0}
+
+h1{font-size:2rem}
+h2{font-size:1.6rem}
+p{font-size:1.1rem;line-height:1.6}
+
+button{
+margin:12px;
+padding:14px 32px;
+font-size:18px;
+border:none;
+border-radius:30px;
+}
+
+.primary{background:#ff4d6d;color:white}
+.secondary{background:#444;color:white}
+
+.card{
+background:rgba(255,255,255,0.08);
+border-radius:18px;
+padding:18px;
+margin:14px 0;
+backdrop-filter:blur(6px);
+}
+
+.snow{
+position:fixed;
+top:-10px;
+animation:fall linear infinite;
+}
+
+@keyframes fall{
+to{transform:translateY(110vh)}
+}
+
+.heart{
+position:fixed;
+font-size:22px;
+animation:boom 1.6s ease-out forwards;
+}
+
+@keyframes boom{
+from{transform:scale(0);opacity:1}
+to{transform:scale(2.5);opacity:0}
+}
+</style>
+</head>
+
+<body>
+
+<!-- SCENES -->
+
+<div class="scene show" id="gate">
+<h1>Hazır mısın?</h1>
+<button class="primary" onclick="start()">Devam Et</button>
+</div>
+
+<div class="scene" id="intro">
+<h2>Bu hikâye sadece <br><strong>bitanem</strong> için yazıldı.</h2>
+</div>
+
+<div class="scene" id="startDate">
+<h2>Her şey burada başladı</h2>
+<p><strong>7 Kasım 2025</strong></p>
+</div>
+
+<div class="scene" id="wrapped">
+<h2>Bizim Wrapped 🎧</h2>
+
+<div class="card">
+<h1 id="days">0</h1>
+<p>gündür konuşuyoruz<br>ve hâlâ ilk günkü gibi</p>
+</div>
+
+<div class="card">
+<h1>%100</h1>
+<p>konuşmadan geçen gün<br>(rekor bizde)</p>
+</div>
+
+<div class="card">
+<h1>∞</h1>
+<p>aklıma düşme sayın</p>
+</div>
+
+<div class="card">
+<h1>%100</h1>
+<p>gülümsetme oranı</p>
+</div>
+
+</div>
+
+<div class="scene" id="freeze">
+<p>
+Şimdi herkesin zamanı akıyor…<br>
+Ama benim için<br>
+<strong>şu an durdu.</strong>
+</p>
+</div>
+
+<div class="scene" id="question">
+<h2>Bu hikâyeyi benimle devam ettirmek ister misin? 💖</h2>
+<button class="primary" onclick="yes()">Evet</button>
+<button class="secondary" onclick="move(this)">Bir Daha Sor</button>
+</div>
+
+<div class="scene" id="final">
+<h2>Bu an artık bizim.</h2>
+<p>01.01.2026 — Her şey burada resmileşti.</p>
+<br>
+<button class="primary" onclick="ig()">Bunu bana Instagram’dan söyle</button>
+</div>
+
+<script>
+const scenes=[
+"gate","intro","startDate","wrapped","freeze","question","final"
+];
+
+function start(){
+document.getElementById("gate").classList.remove("show");
+sequence(1);
+}
+
+function sequence(i){
+if(i>1)document.getElementById(scenes[i-1]).classList.remove("show");
+const el=document.getElementById(scenes[i]);
+el.classList.add("show");
+if(i+1<scenes.length){
+setTimeout(()=>sequence(i+1),4500);
+}
+}
+
+function move(b){
+b.style.position="absolute";
+b.style.left=Math.random()*80+"%";
+b.style.top=Math.random()*80+"%";
+}
+
+function snow(){
+const s=document.createElement("div");
+s.className="snow";
+s.innerHTML="❄️";
+s.style.left=Math.random()*100+"vw";
+s.style.animationDuration=Math.random()*3+2+"s";
+document.body.appendChild(s);
+setTimeout(()=>s.remove(),5000);
+}
+setInterval(snow,260);
+
+// Gün hesabı
+const startDate=new Date("2025-11-07");
+const today=new Date();
+const diff=Math.floor((today-startDate)/(1000*60*60*24));
+document.getElementById("days").innerText=diff;
+
+// EVET
+function yes(){
+document.getElementById("question").classList.remove("show");
+document.getElementById("final").classList.add("show");
+
+for(let i=0;i<120;i++){
+const h=document.createElement("div");
+h.className="heart";
+h.innerHTML="❤️";
+h.style.left=Math.random()*100+"vw";
+h.style.top=Math.random()*100+"vh";
+document.body.appendChild(h);
+setTimeout(()=>h.remove(),1600);
+}
+}
+
+// Instagram yönlendirme
+function ig(){
+window.location.href="https://www.instagram.com/direct/new/?text=Evet dedim 💖";
+}
+</script>
+
+</body>
+</html>
