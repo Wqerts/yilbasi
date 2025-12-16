@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yeni Yılım Sensin</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: Arial, sans-serif;
+}
+
+body{
+  background: radial-gradient(circle at top, #111, #000);
+  color:#fff;
+  overflow:hidden;
+}
+
+/* ❄️ KAR EFEKTİ */
+.snow{
+  position:fixed;
+  top:-10px;
+  color:#fff;
+  opacity:0.8;
+  animation: fall linear infinite;
+}
+@keyframes fall{
+  to{ transform: translateY(110vh); }
+}
+
+/* 🎬 SAHNE */
+.scene{
+  position:absolute;
+  width:100%;
+  text-align:center;
+  opacity:0;
+  transition: opacity 1.5s ease;
+}
+.scene.show{ opacity:1; }
+
+/* 🎞️ ANİMASYONLAR */
+.fadeDown{ animation: fadeDown 2s ease forwards; }
+.fromTop{ animation: fromTop 2s ease forwards; }
+.fromBottom{ animation: fromBottom 2s ease forwards; }
+
+@keyframes fadeDown{
+  to{ transform: translateY(140px); }
+}
+@keyframes fromTop{
+  to{ transform: translateY(260px); }
+}
+@keyframes fromBottom{
+  to{ transform: translateY(-260px); }
+}
+
+/* 🎧 SPOTIFY WRAPPED KART */
+.card{
+  background: linear-gradient(135deg,#1db954,#1aa34a);
+  color:#000;
+  padding:24px;
+  border-radius:22px;
+  max-width:330px;
+  margin:auto;
+  font-weight:bold;
+}
+.card h2{ font-size:1.4em; }
+.card p{ margin-top:12px; font-size:1.1em; }
+
+/* ❤️ BUTON */
+button{
+  padding:16px 36px;
+  border:none;
+  border-radius:40px;
+  background:#ff2d55;
+  color:#fff;
+  font-size:1.2em;
+  cursor:pointer;
+  margin-top:30px;
+}
+
+/* 💥 KALP */
+.heart{
+  position:fixed;
+  font-size:24px;
+  animation: heartFly 2.5s linear forwards;
+}
+@keyframes heartFly{
+  from{ opacity:1; transform:translateY(0) scale(1); }
+  to{ opacity:0; transform:translateY(-180px) scale(2); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🎬 SAHNE 1 -->
+<div class="scene show fadeDown" style="top:40%;font-size:2.4em;font-weight:bold">
+  Bu hikâye bitaneme yazıldı.
+  <div style="margin-top:12px;font-size:0.6em;opacity:0.6;font-weight:normal">
+    ve sadece ona ait...
+  </div>
+</div>
+
+<!-- 🎬 SAHNE 2 -->
+<div class="scene fromTop" style="top:-40%;font-size:1.4em" id="s2">
+  Her şeyin başladığı o an<br>
+  <strong>7 Kasım 2025</strong>
+</div>
+
+<!-- 🎬 SAHNE 3 -->
+<div class="scene fromBottom" style="bottom:-40%" id="s3">
+  <div class="card">
+    <h2>Spotify Wrapped</h2>
+    <p id="days">—</p>
+  </div>
+</div>
+
+<!-- 🎬 SAHNE 4 -->
+<div class="scene" style="top:42%" id="s4">
+  <p style="font-size:1.3em;opacity:0.9">
+    Bazen bir insan gelir…<br>
+    ve zaman onunla anlam kazanır.
+  </p>
+</div>
+
+<!-- 🎬 SAHNE 5 -->
+<div class="scene" style="top:38%" id="s5">
+  <h1 style="font-size:2em">
+    Herkes yeni yıla giriyor…
+  </h1>
+  <p style="margin-top:15px;font-size:1.2em">
+    Ben ise yıllarıma seninle girmek istiyorum.
+  </p>
+  <button onclick="accept()">EVET</button>
+</div>
+
+<!-- 🎬 SAHNE 6 -->
+<div class="scene" style="top:45%" id="s6">
+  <h1>❤️</h1>
+  <p>Bu an sadece bizim.</p>
+</div>
+
+<script>
+/* ❄️ KAR OLUŞTUR */
+for(let i=0;i<45;i++){
+  const snow=document.createElement("div");
+  snow.className="snow";
+  snow.innerText="❄";
+  snow.style.left=Math.random()*100+"vw";
+  snow.style.fontSize=10+Math.random()*18+"px";
+  snow.style.animationDuration=5+Math.random()*5+"s";
+  document.body.appendChild(snow);
+}
+
+/* 🎬 SAHNE ZAMANLARI */
+setTimeout(()=>s2.classList.add("show"),1800);
+setTimeout(()=>s3.classList.add("show"),3800);
+setTimeout(()=>s4.classList.add("show"),6200);
+setTimeout(()=>s5.classList.add("show"),8800);
+
+/* 📅 GÜN SAYISI */
+const start=new Date("2025-11-07");
+const now=new Date();
+const diff=Math.floor((now-start)/(1000*60*60*24));
+days.innerText="Seninle " + diff + " gündür konuşuyoruz";
+
+/* ❤️ EVET */
+function accept(){
+  s5.classList.remove("show");
+  s6.classList.add("show");
+  for(let i=0;i<90;i++){
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerText="❤️";
+    h.style.left=Math.random()*100+"vw";
+    h.style.top=Math.random()*100+"vh";
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),2500);
+  }
+}
+</script>
+
+</body>
+</html>
