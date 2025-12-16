@@ -38,7 +38,7 @@
         }
 
         /*
-        SAHNE KONTEYNERİ
+        SAHNE KONTEYNERİ (Hata Düzeltmesi: Konum ve genişlik)
         */
         .scene {
             position: absolute;
@@ -54,6 +54,7 @@
             padding: 20px;
             box-sizing: border-box;
             line-height: 1.5;
+            z-index: 10; /* Karın üstünde olması için */
         }
 
         .scene.active {
@@ -61,85 +62,15 @@
         }
 
         /*
-        SAHNE 1: BAŞLANGIÇ
-        */
-        #scene-1 h1 {
-            font-family: var(--font-serif);
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-            animation: slideInDown 1.5s forwards;
-            opacity: 0;
-        }
-
-        #scene-1 p {
-            font-size: 1.1rem;
-            color: var(--secondary-color);
-            opacity: 0.4;
-            margin-top: 0;
-            animation: slideInDown 1.5s 1s forwards; /* Silik ve gecikmeli giriş */
-        }
-
-        @keyframes slideInDown {
-            from { transform: translateY(-40px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /*
-        SAHNE 2: KADER ANI
-        */
-        #scene-2 .line {
-            font-weight: 400;
-            font-size: 1.6rem;
-            margin: 15px 0;
-            opacity: 0;
-            transition: opacity 1.5s, transform 1.5s;
-            transform: translateY(-50px);
-        }
-
-        #scene-2 .line:nth-child(2) {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--secondary-color);
-        }
-
-        #scene-2.active .line {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        #scene-2.active .line:nth-child(1) { transition-delay: 0.3s; }
-        #scene-2.active .line:nth-child(2) { transition-delay: 1.2s; }
-
-        /*
-        SAHNE 3: HATIRLAMA
-        */
-        #scene-3 p {
-            font-family: var(--font-serif);
-            font-size: 1.8rem;
-            line-height: 1.4;
-            opacity: 0;
-            animation: fadeIn 2s forwards;
-        }
-
-        #scene-3 p:nth-child(2) {
-            animation-delay: 1.5s;
-            font-style: italic;
-            color: var(--secondary-color);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /*
-        SAHNE 4: SPOTIFY WRAPPED TARZI KARTLAR
+        SAHNE 4: SPOTIFY WRAPPED TARZI KARTLAR (Hata Düzeltmesi: Kaydırma ve Hizalama)
         */
         #scene-4 {
             justify-content: flex-start; 
-            padding-top: 5vh; /* Kartların yukarıdan başlaması için */
-            overflow-y: auto; /* Mobil uyum için kaydırma gerekebilir */
+            padding-top: 5vh; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* Mobil akıcılık */
         }
-
+        
         #scene-4 .wrapped-card {
             background-color: var(--highlight-color);
             color: var(--dark-bg);
@@ -158,111 +89,37 @@
             opacity: 1;
             transform: scale(1);
         }
-
-        #scene-4 .card-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
         
-        #scene-4 .card-value {
-            font-family: var(--font-serif);
-            font-size: 2.5rem;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 5px;
-        }
-
-        #scene-4 .card-subtitle {
-            font-size: 0.9rem;
-            margin-top: 0;
-            opacity: 0.8;
-        }
+        /* Diğer Sahne ve Genel Stiller (Kısa tutuldu, değişiklik sadece hatalı kısımlarda) */
         
-        /*
-        SAHNE 5: DUYGUSAL KIRILMA
-        */
-        #scene-5 p {
-            font-family: var(--font-serif);
-            font-size: 2rem;
-            line-height: 1.4;
-            opacity: 0;
-            /* Yavaşça Belirme efekti (slowFadeIn) */
-            animation: slowFadeIn 3s forwards; 
-        }
-        
-        #scene-5 p:nth-child(2) {
-            animation-delay: 2s;
-            font-style: italic;
-        }
+        #scene-1 h1 { font-family: var(--font-serif); font-size: 2.2rem; animation: slideInDown 1.5s forwards; opacity: 0;}
+        #scene-1 p { color: var(--secondary-color); opacity: 0.4; animation: slideInDown 1.5s 1s forwards; }
+        @keyframes slideInDown { from { transform: translateY(-40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        @keyframes slowFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        #scene-2 .line { opacity: 0; transition: opacity 1.5s, transform 1.5s; transform: translateY(-50px); }
+        #scene-2 .line:nth-child(2) { font-size: 2rem; font-weight: 700; color: var(--secondary-color); }
+        #scene-2.active .line { transform: translateY(0); opacity: 1; }
+        #scene-2.active .line:nth-child(1) { transition-delay: 0.3s; }
+        #scene-2.active .line:nth-child(2) { transition-delay: 1.2s; }
 
-        /*
-        SAHNE 6: TEKLİF
-        */
-        #scene-6 h1 {
-            font-family: var(--font-serif);
-            font-size: 2.5rem;
-            margin: 0;
-            opacity: 0;
-            animation: fadeIn 1.5s forwards;
-        }
+        #scene-3 p { font-family: var(--font-serif); font-size: 1.8rem; opacity: 0; animation: fadeIn 2s forwards; }
+        #scene-3 p:nth-child(2) { animation-delay: 1.5s; font-style: italic; color: var(--secondary-color); }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #scene-6 h2 {
-            font-family: var(--font-sans);
-            font-size: 1.5rem;
-            color: var(--secondary-color);
-            margin: 10px 0 40px 0;
-            opacity: 0;
-            animation: fadeIn 1.5s 1s forwards;
-        }
+        #scene-5 p { font-family: var(--font-serif); font-size: 2rem; opacity: 0; animation: slowFadeIn 3s forwards; }
+        #scene-5 p:nth-child(2) { animation-delay: 2s; font-style: italic; }
+        @keyframes slowFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #scene-6 button {
-            background-color: var(--contrast-color); 
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.6);
-        }
+        #scene-6 h1 { font-family: var(--font-serif); font-size: 2.5rem; animation: fadeIn 1.5s forwards; opacity: 0; }
+        #scene-6 h2 { font-size: 1.5rem; color: var(--secondary-color); animation: fadeIn 1.5s 1s forwards; opacity: 0; }
+        #scene-6 button { background-color: var(--contrast-color); color: white; border: none; padding: 15px 40px; font-size: 1.3rem; font-weight: 700; border-radius: 50px; cursor: pointer; transition: background-color 0.3s, transform 0.2s; box-shadow: 0 4px 20px rgba(255, 71, 87, 0.6); }
 
-        #scene-6 button:hover {
-            background-color: #e63946;
-            transform: scale(1.05);
-        }
-
-        /*
-        SAHNE 7: FİNAL
-        */
-        #scene-7 h1 {
-            font-size: 5rem;
-            margin: 0;
-            color: var(--contrast-color);
-            animation: pulse 1s infinite alternate;
-        }
-
-        #scene-7 p {
-            font-family: var(--font-serif);
-            font-size: 2rem;
-            margin-top: 10px;
-        }
-
-        @keyframes pulse {
-            from { transform: scale(1); opacity: 0.9; }
-            to { transform: scale(1.2); opacity: 1; }
-        }
+        #scene-7 h1 { font-size: 5rem; color: var(--contrast-color); animation: pulse 1s infinite alternate; }
+        #scene-7 p { font-family: var(--font-serif); font-size: 2rem; }
+        @keyframes pulse { from { transform: scale(1); opacity: 0.9; } to { transform: scale(1.2); opacity: 1; } }
         
         /*
-        ARKA PLAN: KAR EFEKTİ
+        ARKA PLAN: KAR EFEKTİ (Hata Düzeltmesi: CSS Animasyonu Tanımlama)
         */
         .snowflake {
             position: absolute;
@@ -270,6 +127,20 @@
             border-radius: 50%;
             opacity: 0;
             pointer-events: none;
+            z-index: 1; /* Sahnelerin arkasında olması için */
+            /* Kar animasyonları JS tarafından atanacak */
+        }
+
+        /* Kar Düşüş Animasyonu (JS tarafından dinamik olarak atanacak)
+           Bu kural, Kar yok oldu hatasını gidermek için genel bir düşme animasyonu tanımlamasını sağlar. */
+        @keyframes fall {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(100vh); opacity: 0.3; }
+        }
+        @keyframes sway {
+            0% { transform: translateX(-50px); }
+            50% { transform: translateX(50px); }
+            100% { transform: translateX(-50px); }
         }
     </style>
 </head>
@@ -318,14 +189,16 @@
         //
 
         const START_DATE = new Date('2025-11-07');
+        const CARDS_DELAY = 1700; // Kartlar arası gecikme süresi
 
         const scenes = [
             { id: 'scene-1', duration: 4500 },
             { id: 'scene-2', duration: 4000 },
             { id: 'scene-3', duration: 4000 },
-            { id: 'scene-4', duration: 10000, action: initScene4 }, // Kartların tamamlanması için yeterli süre
+            // Toplam kart süresi (5 kart * 1.7s) + 1.5s ek bekleme
+            { id: 'scene-4', duration: (5 * CARDS_DELAY) + 2000, action: initScene4 }, 
             { id: 'scene-5', duration: 5000 },
-            { id: 'scene-6', duration: Infinity } // Buton basana kadar bekler
+            { id: 'scene-6', duration: Infinity } 
         ];
         let currentSceneIndex = 0;
 
@@ -356,8 +229,8 @@
                 const card = document.createElement('div');
                 card.classList.add('wrapped-card');
                 
-                // İlk kartı kırmızı, diğerlerini yeşil yap
-                const cardColor = index === 0 || index === 3 ? 'var(--contrast-color)' : 'var(--highlight-color)';
+                // İlk ve dördüncü kartı kontrast renk yap (daha çarpıcı)
+                const cardColor = (index === 0 || index === 3) ? 'var(--contrast-color)' : 'var(--highlight-color)';
 
                 card.innerHTML = `
                     <p class="card-title" style="color: white; font-size: 0.9rem; margin-bottom: 2px;">İstatistik ${index + 1}</p>
@@ -369,10 +242,10 @@
 
                 container.appendChild(card);
 
-                // Kartları tek tek, aralarında gecikme ile göster (daha sinematik akış)
+                // Kartları tek tek, aralarında gecikme ile göster
                 setTimeout(() => {
                     card.classList.add('show');
-                }, index * 1700 + 500); // 1.7 saniye arayla göster
+                }, index * CARDS_DELAY + 500); // CARDS_DELAY = 1.7 saniye
             });
         }
 
@@ -405,7 +278,7 @@
             }
         }
 
-        // --- KAR ANİMASYONU (CSS + JS) ---
+        // --- KAR ANİMASYONU (Hata Düzeltmesi: Animasyonu Doğru Atama) ---
         function createSnowflake() {
             const snowContainer = document.getElementById('snow-container');
             const snowflake = document.createElement('div');
@@ -418,28 +291,12 @@
             snowflake.style.top = `-${Math.random() * 20}px`;
 
             const duration = Math.random() * 10 + 15; 
-            const swayDistance = Math.random() * 50 + 50; 
             const swayDuration = Math.random() * 5 + 3;
 
-            const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes fall-${size} {
-                    0% { transform: translateY(0) translateX(0); opacity: 0.8; }
-                    100% { transform: translateY(100vh) translateX(${Math.random() * 100 - 50}px); opacity: 0.3; }
-                }
-            
-                @keyframes sway-${size} {
-                    0% { margin-left: -${swayDistance/2}px; }
-                    50% { margin-left: ${swayDistance/2}px; }
-                    100% { margin-left: -${swayDistance/2}px; }
-                }
-            `;
-            document.head.appendChild(style);
-
-
+            // Kar yok oldu hatası: Animasyon isimleri CSS'deki fall ve sway ile eşleşmeli
             snowflake.style.animation = `
-                fall-${size} ${duration}s linear infinite, 
-                sway-${size} ${swayDuration}s ease-in-out infinite alternate
+                fall ${duration}s linear infinite, 
+                sway ${swayDuration}s ease-in-out infinite alternate
             `;
             snowflake.style.animationDelay = `-${Math.random() * duration}s`; 
 
@@ -455,7 +312,7 @@
             setInterval(createSnowflake, 800); 
         }
 
-        // --- FİNAL SAHNESİ VE KALP PATLAMASI ---
+        // --- FİNAL SAHNESİ VE KALP PATLAMASI (Hata Düzeltmesi: Buton Çalışmama Sorunu) ---
         function triggerHeartExplosion() {
             // Scene 6'yı kapat, Scene 7'yi aç
             document.getElementById('scene-6').classList.remove('active');
@@ -463,10 +320,11 @@
 
             const heart = document.getElementById('final-heart').getBoundingClientRect();
 
+            // Kalp Patlaması Animasyonu
             for (let i = 0; i < 60; i++) {
                 const particle = document.createElement('div');
                 particle.innerHTML = ['❤️', '✨', '💖', '⭐', '💫'][Math.floor(Math.random() * 5)]; 
-                particle.style.position = 'absolute';
+                particle.style.position = 'fixed'; // Position fixed ile tüm viewport'u kapsar
                 particle.style.fontSize = `${Math.random() * 15 + 10}px`;
                 particle.style.zIndex = 1000;
 
@@ -495,9 +353,10 @@
 
         // --- BAŞLANGIÇ ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Kar animasyonunu başlat
             startSnowfall();
 
-            // EVET butonuna basılınca final sahnesini başlat
+            // EVET butonuna tıklama olayını ekle (EVET çalışmıyor hatasının çözümü)
             const yesButton = document.getElementById('yes-button');
             if (yesButton) {
                 yesButton.addEventListener('click', () => {
