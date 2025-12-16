@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yeni Yılım Sensin</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  overflow: hidden;
+}
+
+.screen {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px;
+}
+
+.screen.active {
+  display: flex;
+}
+
+h1 {
+  font-size: 2.2em;
+  margin-bottom: 15px;
+}
+
+p {
+  font-size: 1.1em;
+  opacity: 0.85;
+  max-width: 380px;
+  margin-bottom: 30px;
+}
+
+button {
+  padding: 14px 30px;
+  border: none;
+  border-radius: 30px;
+  background: #ff2d55;
+  color: white;
+  font-size: 1.1em;
+  cursor: pointer;
+}
+
+.stat {
+  background: rgba(255,255,255,0.08);
+  padding: 16px;
+  border-radius: 18px;
+  margin: 8px 0;
+  width: 100%;
+  max-width: 320px;
+}
+
+.heart {
+  position: fixed;
+  font-size: 22px;
+  animation: fly 2s linear forwards;
+}
+
+@keyframes fly {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(-150px) scale(2); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- SAHNE 1 -->
+<div class="screen active" id="s1">
+  <h1>Hazır mısın?</h1>
+  <p>Bu hikâye sadece bitanem için yazıldı.</p>
+  <button onclick="nextScene()">Devam et</button>
+</div>
+
+<!-- SAHNE 2 -->
+<div class="screen" id="s2">
+  <h1>7 Kasım</h1>
+  <p>Her şeyin başladığı gün.</p>
+  <button onclick="nextScene()">Devam et</button>
+</div>
+
+<!-- SAHNE 3 -->
+<div class="screen" id="s3">
+  <h1>Bizim Wrapped</h1>
+  <div class="stat" id="days">—</div>
+  <div class="stat">Gülüş sebebi: %100</div>
+  <div class="stat">Kalpte kapladığı alan: %100</div>
+  <button onclick="nextScene()">Devam et</button>
+</div>
+
+<!-- SAHNE 4 -->
+<div class="screen" id="s4">
+  <h1>Herkes yeni yıla giriyor…</h1>
+  <p>Ben ise yıllarıma seninle girmek istiyorum.</p>
+  <button onclick="accept()">EVET</button>
+</div>
+
+<!-- SAHNE 5 -->
+<div class="screen" id="s5">
+  <h1>❤️</h1>
+  <p>Bu an sadece bizim.</p>
+</div>
+
+<script>
+let scene = 1;
+
+function nextScene() {
+  document.getElementById("s" + scene).classList.remove("active");
+  scene++;
+  document.getElementById("s" + scene).classList.add("active");
+}
+
+function accept() {
+  document.getElementById("s4").classList.remove("active");
+  document.getElementById("s5").classList.add("active");
+  hearts();
+}
+
+function hearts() {
+  for (let i = 0; i < 70; i++) {
+    const h = document.createElement("div");
+    h.className = "heart";
+    h.innerText = "❤️";
+    h.style.left = Math.random() * window.innerWidth + "px";
+    h.style.top = Math.random() * window.innerHeight + "px";
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 2000);
+  }
+}
+
+// GÜN SAYISI
+const start = new Date("2024-11-07");
+const now = new Date();
+const diff = Math.floor((now - start) / (1000*60*60*24));
+document.getElementById("days").innerText =
+  diff + " gündür birlikteyiz (ve daha yeni başlıyoruz)";
+</script>
+
+</body>
+</html>
