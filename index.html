@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadece İkimize Ait Bir Hikâye</title>
+    <style>
+        /*
+        GENEL STİLLER VE MOBİL ÖNCELİK
+        */
+        :root {
+            --dark-bg: #0d0d1e;
+            --main-color: #f7f7f7;
+            --secondary-color: #b0c4de;
+            --highlight-color: #1ed760; /* Spotify yeşili */
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Montserrat', sans-serif;
+            --transition-speed: 1s;
+        }
+
+        /* Google Fonts Embed (Offline çalışması için HTML'e import edildi) */
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@300;700&display=swap');
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Kar tanesi animasyonu için */
+            background-color: var(--dark-bg);
+            color: var(--main-color);
+            font-family: var(--font-sans);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /*
+        SAHNE KONTEYNERİ
+        */
+        .scene {
+            position: absolute;
+            width: 90%;
+            max-width: 600px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .scene.active {
+            opacity: 1;
+        }
+
+        /*
+        SAHNE 1: GİRİŞ
+        */
+        #scene-1 h1 {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            animation: slideInDown 1.5s forwards;
+            opacity: 0;
+        }
+
+        #scene-1 p {
+            font-size: 1.2rem;
+            color: var(--secondary-color);
+            opacity: 0.6;
+            margin-top: 0;
+            animation: slideInDown 1.5s 0.5s forwards;
+        }
+
+        @keyframes slideInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /*
+        SAHNE 2: BAŞLANGIÇ TARİHİ
+        */
+        #scene-2 .line {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 10px 0;
+            opacity: 0;
+        }
+
+        #scene-2 .line:nth-child(1) {
+            transition: transform 1s, opacity 1s;
+            transform: translateY(-50px);
+        }
+        #scene-2 .line:nth-child(2) {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            transition: transform 1s 0.5s, opacity 1s 0.5s;
+            transform: translateY(-50px);
+        }
+
+        #scene-2.active .line {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /*
+        SAHNE 3: SPOTIFY WRAPPED TARZI KART
+        */
+        #scene-3 .wrapped-card {
+            background-color: var(--highlight-color);
+            color: var(--dark-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 350px;
+            box-sizing: border-box;
+            opacity: 0;
+            animation: slideInUp 1.2s forwards;
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #scene-3 .wrapped-card h2 {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #scene-3 .wrapped-card .day-count {
+            font-family: var(--font-serif);
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        #scene-3 .wrapped-card p {
+            font-size: 1.1rem;
+            margin-top: 0;
+        }
+
+        /*
+        SAHNE 4: DUYGUSAL YÜKSELİŞ
+        */
+        #scene-4 p {
+            font-family: var(--font-serif);
+            font-size: 1.8rem;
+            line-height: 1.4;
+            opacity: 0;
+            animation: fadeIn 2s forwards;
+        }
+
+        #scene-4 p:nth-child(2) {
+            animation-delay: 1.5s;
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /*
+        SAHNE 5: TEKLİF
+        */
+        #scene-5 h1 {
+            font-family: var(--font-serif);
+            font-size: 2.5rem;
+            margin: 0;
+        }
+
+        #scene-5 h2 {
+            font-family: var(--font-sans);
+            font-size: 1.5rem;
+            color: var(--secondary-color);
+            margin: 10px 0 40px 0;
+        }
+
+        #scene-5 button {
+            background-color: #ff4757; /* Kırmızımsı vurgu */
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.6);
+        }
+
+        #scene-5 button:hover {
+            background-color: #e63946;
+            transform: scale(1.05);
+        }
+
+        /*
+        SAHNE 6: FİNAL
+        */
+        #scene-6 h1 {
+            font-size: 5rem;
+            margin: 0;
+            animation: pulse 1s infinite alternate;
+        }
+
+        #scene-6 p {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.1); opacity: 1; }
+        }
+
+        /*
+        ARKA PLAN: KAR EFEKTİ
+        */
+        .snowflake {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none; /* Etkileşim olmasın */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="snow-container"></div>
+
+    <div id="scene-1" class="scene">
+        <h1 style="text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);">Bu hikâye bitaneme yazıldı.</h1>
+        <p>ve sadece ona ait…</p>
+    </div>
+
+    <div id="scene-2" class="scene">
+        <div class="line">Her şeyin başladığı o an</div>
+        <div class="line">7 Kasım 2025</div>
+    </div>
+
+    <div id="scene-3" class="scene">
+        <div class="wrapped-card">
+            <h2>Bizim Wrapped'ımız</h2>
+            <div id="day-count" class="day-count">0</div>
+            <p>Seninle tam bu kadar gündür konuşuyoruz.</p>
+        </div>
+    </div>
+
+    <div id="scene-4" class="scene">
+        <p>Bazen bir insan gelir…</p>
+        <p>ve zaman onunla anlam kazanır.</p>
+    </div>
+
+    <div id="scene-5" class="scene">
+        <h1>Herkes yeni yıla giriyor…</h1>
+        <h2>Ben ise yıllarıma seninle girmek istiyorum.</h2>
+        <button id="yes-button">EVET</button>
+    </div>
+
+    <div id="scene-6" class="scene">
+        <h1 id="final-heart">❤️</h1>
+        <p>Bu an sadece bizim.</p>
+        </div>
+
+
+    <script>
+        //
+        // JAVASCRIPT: SAHNE AKIŞI VE ANİMASYONLAR
+        //
+
+        const scenes = [
+            { id: 'scene-1', duration: 4000 },
+            { id: 'scene-2', duration: 4000 },
+            { id: 'scene-3', duration: 5000 },
+            { id: 'scene-4', duration: 5000 },
+            { id: 'scene-5', duration: Infinity } // Teklif, butona basılana kadar bekle
+        ];
+        let currentSceneIndex = 0;
+
+        // --- GÜN SAYISI HESAPLAMA ---
+        function calculateDays() {
+            const startDate = new Date('2025-11-07');
+            const now = new Date();
+            // Zaman farkını milisaniye cinsinden hesapla
+            const diffTime = Math.abs(now - startDate);
+            // Milisaniyeyi güne çevir
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            document.getElementById('day-count').textContent = diffDays.toLocaleString('tr-TR');
+        }
+
+        // --- SAHNE GEÇİŞ YÖNETİCİSİ ---
+        function nextScene() {
+            if (currentSceneIndex >= scenes.length) return;
+
+            // Önceki sahneyi devre dışı bırak
+            if (currentSceneIndex > 0) {
+                document.getElementById(scenes[currentSceneIndex - 1].id).classList.remove('active');
+            }
+
+            const currentSceneData = scenes[currentSceneIndex];
+            const currentSceneElement = document.getElementById(currentSceneData.id);
+
+            // Yeni sahneyi aktif et
+            currentSceneElement.classList.add('active');
+
+            // Sahneye özel eylemler
+            if (currentSceneData.id === 'scene-3') {
+                calculateDays();
+            }
+
+            // Eğer teklif sahnesi değilse, otomatik geçişi ayarla
+            if (currentSceneData.duration !== Infinity) {
+                setTimeout(() => {
+                    currentSceneIndex++;
+                    nextScene();
+                }, currentSceneData.duration);
+            }
+        }
+
+        // --- KAR ANİMASYONU (CSS + JS) ---
+        function createSnowflake() {
+            const snowContainer = document.getElementById('snow-container');
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+
+            // Başlangıç pozisyonu (Genişlik: 0-100%, Yükseklik: Ekranın üstü)
+            snowflake.style.left = `${Math.random() * 100}vw`;
+            snowflake.style.top = `-${Math.random() * 20}px`;
+
+            // Boyut ve hızı rastgele ayarla
+            const size = Math.random() * 3 + 2; // 2px - 5px
+            snowflake.style.width = `${size}px`;
+            snowflake.style.height = `${size}px`;
+
+            // Animasyon süresi (Yavaş: 15s, Hızlı: 5s)
+            const duration = Math.random() * 10 + 5;
+            snowflake.style.animation = `fall ${duration}s linear infinite`;
+            snowflake.style.animationDelay = `-${Math.random() * duration}s`; // Rastgele başlangıç
+
+            // CSS Animasyonu: Düşme
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fall {
+                    0% { transform: translateY(0) translateX(0); opacity: 0.8; }
+                    100% { transform: translateY(100vh) translateX(${Math.random() * 100 - 50}px); opacity: 0.3; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            snowContainer.appendChild(snowflake);
+
+            // Belli bir süre sonra eskileri temizle
+            setTimeout(() => snowflake.remove(), duration * 1000 + 100);
+        }
+
+        function startSnowfall() {
+            // Başlangıçta 50-70 tane kar tanesi oluştur
+            for (let i = 0; i < 60; i++) {
+                createSnowflake();
+            }
+            // Sonra sürekli kar üret
+            setInterval(createSnowflake, 500);
+        }
+
+        // --- FİNAL SAHNESİ VE KALP PATLAMASI ---
+        function triggerHeartExplosion() {
+            // Teklif sahnesini gizle
+            document.getElementById('scene-5').classList.remove('active');
+            // Final sahnesini göster
+            document.getElementById('scene-6').classList.add('active');
+
+            // Basit bir Kalp Patlaması/Confetti animasyonu (Çok karmaşık canvas kullanmadan)
+            const finalScene = document.getElementById('scene-6');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.innerHTML = ['❤️', '✨', '💖', '⭐'][Math.floor(Math.random() * 4)]; // Rastgele Kalp/Yıldız
+                particle.style.position = 'absolute';
+                particle.style.fontSize = `${Math.random() * 20 + 10}px`;
+                particle.style.zIndex = 1000;
+
+                // Başlangıç noktası
+                const heart = document.getElementById('final-heart').getBoundingClientRect();
+                particle.style.left = `${heart.left + heart.width / 2}px`;
+                particle.style.top = `${heart.top + heart.height / 2}px`;
+                
+                // Patlama efekti için CSS animasyonu ekle
+                const angle = Math.random() * 360; // Rastgele açı
+                const distance = Math.random() * 300 + 100; // Rastgele mesafe
+                const targetX = distance * Math.cos(angle * Math.PI / 180);
+                const targetY = distance * Math.sin(angle * Math.PI / 180);
+                const animDuration = Math.random() * 2 + 1;
+
+                particle.style.transition = `transform ${animDuration}s ease-out, opacity ${animDuration}s ease-in`;
+                
+                // DOM'a ekle ve hemen animasyonu başlat
+                document.body.appendChild(particle);
+
+                // Tarayıcının DOM değişikliğini görmesi için kısa bir gecikme
+                setTimeout(() => {
+                    particle.style.transform = `translate(${targetX}px, ${targetY}px) rotate(${Math.random() * 720}deg)`;
+                    particle.style.opacity = 0;
+                }, 50);
+
+                // Animasyon bitince temizle
+                setTimeout(() => particle.remove(), animDuration * 1000 + 100);
+            }
+        }
+
+        // --- BAŞLANGIÇ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            startSnowfall();
+
+            // EVET butonuna basılınca final sahnesini başlat
+            document.getElementById('yes-button').addEventListener('click', () => {
+                triggerHeartExplosion();
+            });
+            
+            // Siteyi otomatik başlat
+            nextScene();
+        });
+    </script>
+
+</body>
+</html>
