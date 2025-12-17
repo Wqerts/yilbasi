@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sadece Senin İçin</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#050508;
+color:white;
+height:100vh;
+overflow:hidden;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+
+.hidden{display:none}
+
+button{
+padding:15px 35px;
+border-radius:30px;
+border:none;
+cursor:pointer;
+font-weight:bold;
+}
+
+#lock{
+position:fixed;
+inset:0;
+background:black;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:9999;
+}
+
+#admin{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.95);
+z-index:10000;
+display:none;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+gap:15px;
+}
+
+input{
+padding:10px;
+border-radius:8px;
+border:none;
+font-size:16px;
+}
+
+#timer{
+font-size:3rem;
+color:#d4af37;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🔒 KİLİT -->
+<div id="lock">
+<h2>🔒 1 OCAK 00:00’DA AÇILACAK</h2>
+<div id="timer">00:00:00</div>
+</div>
+
+<!-- 🎁 İÇERİK -->
+<div id="content" class="hidden">
+<h1>❤️ HOŞ GELDİN ❤️</h1>
+<p>Buradan sonrası sürpriz…</p>
+</div>
+
+<!-- 👑 ADMIN -->
+<div id="admin">
+<h2>👑 ADMIN PANEL</h2>
+<input id="pass" type="password" placeholder="Şifre">
+<button onclick="login()">GİR</button>
+<button onclick="forceOpen()">Kilidi Aç</button>
+<button onclick="closeAdmin()">Kapat</button>
+</div>
+
+<script>
+/* === AYARLAR === */
+let targetDate = new Date("2026-01-01T00:00:00").getTime();
+const ADMIN_PASS = "1905";
+
+/* === ELEMENTS === */
+const lock=document.getElementById("lock");
+const content=document.getElementById("content");
+const timer=document.getElementById("timer");
+const admin=document.getElementById("admin");
+const pass=document.getElementById("pass");
+
+/* === TIMER === */
+setInterval(()=>{
+const now=Date.now();
+const diff=targetDate-now;
+
+if(diff<=0){
+unlock();
+}else{
+const h=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+const m=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+const s=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+timer.textContent=`${h}:${m}:${s}`;
+}
+},1000);
+
+/* === UNLOCK === */
+function unlock(){
+lock.style.display="none";
+content.classList.remove("hidden");
+}
+
+/* === ADMIN SHORTCUT (A D M I N) === */
+let keySeq="";
+document.addEventListener("keydown",e=>{
+keySeq+=e.key.toLowerCase();
+if(keySeq.includes("admin")){
+admin.style.display="flex";
+keySeq="";
+}
+if(keySeq.length>10)keySeq="";
+});
+
+/* === ADMIN LOGIN === */
+function login(){
+if(pass.value===ADMIN_PASS){
+alert("Admin girişi başarılı");
+}else{
+alert("Yanlış şifre");
+}
+}
+
+/* === FORCE OPEN === */
+function forceOpen(){
+unlock();
+admin.style.display="none";
+}
+
+/* === CLOSE === */
+function closeAdmin(){
+admin.style.display="none";
+pass.value="";
+}
+</script>
+
+</body>
+</html>
