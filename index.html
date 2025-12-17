@@ -3,155 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadece Senin İçin</title>
+    <title>Yılbaşı Sürprizi</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@1,600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=Playfair+Display:ital,wght@1,700&display=swap');
 
-        :root {
-            --bg: #000000;
-            --accent: #ff3b30;
-            --gold: #ffcc00;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-        }
+        :root { --red: #d62828; --gold: #f7b731; --bg: #050505; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html { width: 100%; height: 100%; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body, html { 
-            width: 100%; height: 100%; 
-            background: var(--bg); color: #fff;
-            font-family: 'Inter', sans-serif;
-            overflow: hidden;
-        }
+        /* YOĞUN KAR EFEKTİ */
+        .snow { position: absolute; background: white; border-radius: 50%; pointer-events: none; z-index: 100; filter: blur(1px); }
 
-        /* Dinamik Arka Plan */
-        #bg-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
-            z-index: -1;
-        }
-
-        /* --- SAHNELER --- */
+        /* SAHNELER - Çakışmayı Önleyen Yapı */
         .scene {
             position: absolute; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; padding: 30px;
-            opacity: 0; visibility: hidden;
-            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: scale(0.95);
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px; z-index: 10;
         }
-        .scene.active { opacity: 1; visibility: visible; transform: scale(1); }
+        .active { display: flex; animation: fadeIn 1.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(1.05); } to { opacity: 1; transform: scale(1); } }
 
-        /* --- MODERN TIMER --- */
-        #timer { 
-            font-size: 5rem; font-weight: 300; letter-spacing: -3px; 
-            margin: 20px 0; color: #fff;
-        }
-        .wait-text { font-size: 0.9rem; letter-spacing: 5px; opacity: 0.5; text-transform: uppercase; }
-
-        /* --- GLASS CARD (MEKTUP & WRAPPED) --- */
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%; max-width: 350px;
+        /* CANLI ALTYAZI */
+        #live-subtitle {
+            position: fixed; bottom: 10%; width: 100%; text-align: center;
+            font-size: 1.5rem; font-family: 'Playfair Display'; color: var(--gold);
+            text-shadow: 0 0 15px rgba(247, 183, 49, 0.5); z-index: 200; opacity: 0; transition: 0.8s;
         }
 
-        /* --- MEKTUP TASARIMI --- */
-        .envelope-container { 
-            position: relative; width: 100%; max-width: 280px; height: 180px; 
-            background: #222; border-radius: 15px; cursor: pointer; transition: 0.5s;
-        }
-        .letter-paper {
-            position: absolute; width: 90%; height: 140px; background: #fff;
-            left: 5%; bottom: 10px; border-radius: 10px; color: #111;
-            display: flex; align-items: center; justify-content: center;
-            padding: 20px; font-family: 'Playfair Display', serif; font-size: 1.1rem;
-            transition: 0.8s; z-index: 1; transform: translateY(0);
-        }
-        .open .letter-paper { transform: translateY(-100px); z-index: 10; }
-
-        /* --- WRAPPED KARTLARI --- */
+        /* WRAPPED KARTLARI */
         .wrapped-card {
-            background: #fff; color: #000;
-            width: 100%; max-width: 320px; padding: 40px; border-radius: 30px;
-            position: absolute; opacity: 0; transform: translateY(30px);
-            transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 25px;
+            padding: 40px; width: 85%; max-width: 350px; position: absolute;
+            opacity: 0; transform: translateY(50px); transition: 0.8s;
         }
         .active-card { opacity: 1; transform: translateY(0); }
 
-        /* --- BUTONLAR --- */
-        .btn {
-            padding: 16px 32px; border-radius: 50px; border: none;
-            font-size: 1rem; font-weight: 600; cursor: pointer;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #btn-yes { background: #fff; color: #000; }
-        #btn-yes:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
-        #btn-no { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; position: absolute; }
+        /* TEKLİF MENÜSÜ */
+        .proposal-box { background: linear-gradient(135deg, #d62828 0%, #000 100%); padding: 50px 30px; border-radius: 40px; border: 2px solid var(--gold); }
+        .btn { padding: 15px 35px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; margin: 10px; transition: 0.3s; }
+        #btn-yes { background: var(--gold); color: black; font-size: 1.1rem; box-shadow: 0 0 20px var(--gold); }
+        #btn-no { background: transparent; color: white; border: 1px solid white; position: absolute; }
 
-        /* --- ADMIN PANEL --- */
-        #admin-panel {
-            position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.9);
-            padding: 12px; z-index: 9999; display: none; text-align: center;
-            border-bottom: 1px solid #333; font-size: 11px;
-        }
-
-        /* Kar Efekti */
-        .snow { position: absolute; background: #fff; border-radius: 50%; pointer-events: none; opacity: 0.6; }
-
-        h1, h2 { font-weight: 600; margin-bottom: 15px; }
-        span.highlight { color: var(--gold); }
+        /* ADMIN PANEL */
+        #admin-panel { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 10px; z-index: 1000; display: none; font-size: 11px; border-bottom: 1px solid var(--red); }
+        input { background: #222; border: 1px solid #444; color: white; padding: 5px; border-radius: 5px; width: 150px; }
     </style>
 </head>
 <body>
 
-    <div id="bg-canvas"></div>
-
     <div id="admin-panel">
-        <span style="color:var(--gold)">KONTROL:</span> <span id="status-log">...</span> | 
-        <button style="background:none; color:white; border:1px solid #444; padding:2px 8px; cursor:pointer;" onclick="db.ref('testMode').set(Date.now())">Kilidi Aç</button>
+        <input type="text" id="admin-sub" placeholder="Altyazı gönder...">
+        <button onclick="sendSub()">Gönder</button> | 
+        <button onclick="db.ref('testMode').set(Date.now())">Kilidi Aç</button> |
+        Aktif: <span id="user-count">0</span>
     </div>
 
+    <div id="live-subtitle"></div>
+
     <div id="scene-countdown" class="scene active">
-        <span class="wait-text">Hikâyemiz başlıyor</span>
-        <div id="timer">00:00:00</div>
-        <p style="opacity: 0.4;">Kalan zamanın her saniyesi seni özlemekle geçiyor.</p>
+        <h1 id="timer" style="font-size: 4rem; color: var(--gold); font-weight: 200;">00:00:00</h1>
+        <p style="letter-spacing: 3px; opacity: 0.6; margin-top: 10px;">YENİ YILA VE BİZE DOĞRU</p>
     </div>
 
     <div id="scene-letter" class="scene">
-        <div class="envelope-container" id="envelope">
-            <div class="letter-paper">Sana söylemek istediğim çok şey var ama en güzeli şu: İyi ki varsın... ❤️</div>
+        <div style="background:white; color:#111; padding:40px; border-radius:5px; width:300px; font-family:'Playfair Display'; position:relative;">
+            <div id="letter-msg">Seninle her şey daha anlamlı...</div>
         </div>
-        <p style="margin-top: 50px; font-style: italic; opacity: 0.7;">Bir mektubun var, açmak için dokun.</p>
+        <button class="btn" onclick="transition('scene-letter', 'scene-wrapped')" style="background:var(--red); color:white; margin-top:30px;">Devam Et ❤️</button>
     </div>
 
     <div id="scene-wrapped" class="scene"></div>
 
     <div id="scene-proposal" class="scene">
-        <div class="glass-card">
-            <h2 style="font-size: 1.8rem; margin-bottom: 30px;">Yeni yıla değil, <span class="highlight">yıllarıma</span> benimle girmek ister misin?</h2>
-            <div style="position:relative; height:120px; width:100%; display:flex; justify-content:center; align-items:center;">
-                <button id="btn-yes" class="btn">Evet, sonsuza dek!</button>
+        <div class="proposal-box">
+            <h1 style="font-family:'Playfair Display'; margin-bottom:20px;">Ömrüm olur musun?</h1>
+            <div style="height:150px; position:relative; width:100%;">
+                <button id="btn-yes" class="btn">EVET!</button>
                 <button id="btn-no" class="btn">Hayır</button>
             </div>
         </div>
     </div>
 
     <div id="scene-final" class="scene">
-        <h1 style="font-size: 5rem; margin-bottom: 20px;">❤️</h1>
-        <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem;">Seni Seviyorum</h1>
-        <p style="opacity: 0.6; margin-top: 10px; letter-spacing: 3px;">Sonsuza kadar biz.</p>
+        <h1 style="font-size: 5rem;">🎄❤️</h1>
+        <h1 style="font-family:'Playfair Display';">Mutlu Yıllar Sevgilim!</h1>
     </div>
 
     <script>
-        // --- FIREBASE AYARLARI ---
         const firebaseConfig = {
             apiKey: "AIzaSyBwa-t-_rUBabzgDB5Ih5PCK8e2Ki3AarM",
             authDomain: "sunucu-dd652.firebaseapp.com",
@@ -164,28 +105,91 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
+        // Admin Kontrolü
         if(window.location.search.includes('admin=1')) document.getElementById('admin-panel').style.display = 'block';
 
-        function logStatus(msg) {
-            db.ref('userStatus').set({ action: msg, time: new Date().toLocaleTimeString() });
+        // Sayaç
+        const uRef = db.ref('online').push();
+        db.ref('.info/connected').on('value', s => { if(s.val()){ uRef.onDisconnect().remove(); uRef.set(true); }});
+        db.ref('online').on('value', s => document.getElementById('user-count').innerText = s.numChildren());
+
+        // Canlı Altyazı Fonksiyonu
+        function sendSub() {
+            const val = document.getElementById('admin-sub').value;
+            db.ref('subtitle').set({ text: val, t: Date.now() });
         }
 
-        db.ref('userStatus').on('value', snap => {
+        db.ref('subtitle').on('value', snap => {
             const data = snap.val();
-            if(data) document.getElementById('status-log').innerText = `${data.action}`;
+            if(data) {
+                const sub = document.getElementById('live-subtitle');
+                sub.innerText = data.text;
+                sub.style.opacity = 1;
+                setTimeout(() => sub.style.opacity = 0, 4000);
+            }
         });
 
-        db.ref('testMode').on('value', (s) => { if(s.exists()) targetDate = new Date(); });
+        // Sahne Geçiş Fonksiyonu
+        function transition(from, to) {
+            document.getElementById(from).classList.remove('active');
+            setTimeout(() => {
+                document.getElementById(to).classList.add('active');
+                if(to === 'scene-wrapped') startWrapped();
+            }, 100);
+        }
 
-        // --- TIMER ---
+        // Wrapped Mantığı (7 Kart)
+        function startWrapped() {
+            const container = document.getElementById('scene-wrapped');
+            const cards = [
+                "Tanıştığımız o ilk gün...", "Gülüşünle dünyamı aydınlattığın o an.",
+                "En sevdiğimiz şarkı başladığında...", "Beraber kurduğumuz hayaller.",
+                "Her zorlukta yan yana duruşumuz.", "Seninle geçen her saniye bir hazine.",
+                "Ve şimdi yeni bir yıla el ele giriyoruz."
+            ];
+            cards.forEach((text, i) => {
+                const c = document.createElement('div');
+                c.className = 'wrapped-card';
+                c.id = `card-${i}`;
+                c.innerHTML = `<p>${text}</p>`;
+                container.appendChild(c);
+            });
+
+            let idx = 0;
+            function next() {
+                if(idx > 0) document.getElementById(`card-${idx-1}`).classList.remove('active-card');
+                if(idx < cards.length) {
+                    document.getElementById(`card-${idx}`).classList.add('active-card');
+                    idx++; setTimeout(next, 4000);
+                } else {
+                    setTimeout(() => transition('scene-wrapped', 'scene-proposal'), 1000);
+                }
+            }
+            next();
+        }
+
+        // Kar Yağışı (Yoğunlaştırılmış)
+        function createSnow() {
+            const s = document.createElement('div');
+            s.className = 'snow';
+            const size = Math.random() * 5 + 2 + 'px';
+            s.style.width = size; s.style.height = size;
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.top = '-10px';
+            s.style.opacity = Math.random();
+            const duration = Math.random() * 3 + 2 + 's';
+            document.body.appendChild(s);
+            s.animate([{ top: '-10px' }, { top: '100vh' }], { duration: parseFloat(duration) * 1000 });
+            setTimeout(() => s.remove(), parseFloat(duration) * 1000);
+        }
+        setInterval(createSnow, 50); // Kar yoğunluğu burada!
+
+        // Zamanlayıcı
         let targetDate = new Date(); targetDate.setHours(24,0,0,0);
         setInterval(() => {
             const diff = targetDate - new Date();
             if(diff <= 0) {
-                if(document.getElementById('scene-countdown').classList.contains('active')) {
-                    transition('scene-countdown', 'scene-letter');
-                    logStatus("Site Açıldı! ✨");
-                }
+                if(document.getElementById('scene-countdown').classList.contains('active')) transition('scene-countdown', 'scene-letter');
             } else {
                 const h = Math.floor(diff/3600000).toString().padStart(2,'0');
                 const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
@@ -194,88 +198,16 @@
             }
         }, 1000);
 
-        function transition(from, to) {
-            const f = document.getElementById(from);
-            const t = document.getElementById(to);
-            f.style.transform = "scale(1.1)";
-            f.classList.remove('active');
-            setTimeout(() => {
-                t.classList.add('active');
-                if(to === 'scene-wrapped') startWrapped();
-            }, 800);
-        }
+        db.ref('testMode').on('value', () => targetDate = new Date());
 
-        // --- MEKTUP ---
-        document.getElementById('envelope').onclick = function() {
-            this.classList.add('open');
-            logStatus("Mektubu açtı 💌");
-            setTimeout(() => {
-                document.body.onclick = () => { transition('scene-letter', 'scene-wrapped'); document.body.onclick = null; };
-            }, 2500);
+        // Hayır Butonu Kaçışı
+        const bNo = document.getElementById('btn-no');
+        bNo.onmouseover = () => {
+            bNo.style.left = Math.random()*80 + '%';
+            bNo.style.top = Math.random()*80 + '%';
         };
+        document.getElementById('btn-yes').onclick = () => transition('scene-proposal', 'scene-final');
 
-        // --- WRAPPED ---
-        function startWrapped() {
-            logStatus("Hatıraları izliyor 📸");
-            const container = document.getElementById('scene-wrapped');
-            const stats = [
-                {l:"Seninle Geçen Her Gün", v:"Bir Hediye"},
-                {l:"Kalbimin Sahibi", v:"Sadece Sen"},
-                {l:"Sana Olan Aşkım", v:"∞"}
-            ];
-            stats.forEach((s, i) => {
-                const card = document.createElement('div');
-                card.className = 'wrapped-card';
-                card.id = `card-${i}`;
-                card.innerHTML = `<p style="text-transform:uppercase; font-size:0.8rem; letter-spacing:2px; margin-bottom:10px; opacity:0.6;">${s.l}</p><h1 style="font-size:2.5rem; font-family:'Playfair Display'">${s.v}</h1>`;
-                container.appendChild(card);
-            });
-            let idx = 0;
-            function next() {
-                if(idx > 0) document.getElementById(`card-${idx-1}`).classList.remove('active-card');
-                if(idx < stats.length) {
-                    setTimeout(() => {
-                        document.getElementById(`card-${idx}`).classList.add('active-card');
-                        idx++; setTimeout(next, 3500);
-                    }, 500);
-                } else {
-                    setTimeout(() => transition('scene-wrapped', 'scene-proposal'), 1500);
-                }
-            }
-            next();
-        }
-
-        // --- HAYIR BUTONU ---
-        const btnNo = document.getElementById('btn-no');
-        const btnYes = document.getElementById('btn-yes');
-        btnNo.onmouseover = btnNo.onclick = () => {
-            btnNo.style.left = Math.random()*80 + '%';
-            btnNo.style.top = Math.random()*80 + '%';
-            logStatus("Hayır'dan kaçıyor 🏃‍♂️");
-        };
-
-        btnYes.onclick = () => {
-            logStatus("EVET DEDİ! 💍❤️");
-            transition('scene-proposal', 'scene-final');
-            setInterval(createSnow, 150);
-        };
-
-        function createSnow() {
-            const s = document.createElement('div');
-            s.className = 'snow';
-            const size = Math.random()*4 + 'px';
-            s.style.width = size; s.style.height = size;
-            s.style.left = Math.random()*100 + 'vw';
-            s.style.top = '-10px';
-            s.style.opacity = Math.random();
-            const fallTime = Math.random()*3 + 3;
-            s.style.transition = `transform ${fallTime}s linear, opacity 1s`;
-            document.body.appendChild(s);
-            setTimeout(() => {
-                s.style.transform = `translateY(110vh) translateX(${Math.random()*50}px)`;
-            }, 10);
-            setTimeout(() => s.remove(), fallTime * 1000);
-        }
     </script>
 </body>
 </html>
