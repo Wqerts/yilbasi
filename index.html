@@ -133,6 +133,17 @@ justify-content:center;
 align-items:center;
 }
 
+#admin-panel{
+position:fixed;
+top:0;
+width:100%;
+background:rgba(0,0,0,.85);
+padding:10px;
+z-index:20000;
+display:none;
+text-align:center;
+}
+
 #s-final h1{animation:pulse 1.2s infinite}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
 </style>
@@ -140,8 +151,18 @@ align-items:center;
 
 <body>
 
+<!-- ADMIN -->
+<div id="admin-panel">
+<button class="btn" style="background:var(--gold);color:black" onclick="forceUnlock()">
+Kilidi Aç (Admin)
+</button>
+</div>
+
+<!-- ENTRY -->
 <div id="entry-gate">
-<button class="btn" style="background:var(--red);color:white" onclick="initApp()">Sürprizi Başlat ✨</button>
+<button class="btn" style="background:var(--red);color:white" onclick="initApp()">
+Sürprizi Başlat ✨
+</button>
 </div>
 
 <div class="bg-overlay"></div>
@@ -169,13 +190,17 @@ Yeni yılın kutlu olsun bitanem…<br>
 
 <section id="s-prop" class="scene">
 <h2 style="font-family:'Playfair Display'">Sen yıllarıma girmek ister misin?</h2><br>
-<button class="btn" style="background:white;color:black" onclick="changeScene('s-prop','s-final')">EVET</button>
+<button class="btn" style="background:white;color:black" onclick="changeScene('s-prop','s-final')">
+EVET
+</button>
 <button id="btn-no" class="btn">Hayır</button>
 </section>
 
 <section id="s-final" class="scene">
 <h1>❤️</h1>
-<h2 style="font-family:'Playfair Display'">SENİ ÇOOOOOK SEVİYORUM<br>İYİ Kİ VARSIN ❤️</h2>
+<h2 style="font-family:'Playfair Display'">
+SENİ ÇOOOOOK SEVİYORUM<br>İYİ Kİ VARSIN ❤️
+</h2>
 </section>
 
 <script>
@@ -187,14 +212,26 @@ const btnNo=document.getElementById('btn-no');
 const snow=document.getElementById('snow');
 const confetti=document.getElementById('confetti');
 const sWrapped=document.getElementById('s-wrapped');
+const adminPanel=document.getElementById('admin-panel');
+const entryGate=document.getElementById('entry-gate');
 
 /* STATE */
 let started=false,locked=false;
-const targetDate=new Date("2026-01-01T00:00:00").getTime();
+let targetDate=new Date("2026-01-01T00:00:00").getTime();
+
+/* ADMIN CHECK */
+if(location.search.includes('admin=1')){
+adminPanel.style.display='block';
+}
+
+/* ADMIN FORCE */
+function forceUnlock(){
+targetDate=Date.now();
+}
 
 /* START */
 function initApp(){
-document.getElementById('entry-gate').style.display='none';
+entryGate.style.display='none';
 started=true;
 initSnow();
 playMusic();
