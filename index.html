@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sadece Senin İçin</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@1,600&display=swap');
+
+        :root {
+            --red: #8e0e0e; --gold: #d4af37; --white: #f8f9fa; --bg: #050508;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; 
+            overflow: hidden; height: 100vh; width: 100vw; position: fixed;
+        }
+
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a0b0b 0%, #050508 100%);
+            z-index: -2; animation: bgPulse 10s infinite alternate;
+        }
+        @keyframes bgPulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        canvas#snow { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 50; }
+
+        .scene {
+            position: absolute; inset: 0; display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 30px; z-index: 10;
+        }
+        .active { display: flex; animation: sceneFade 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes sceneFade { 0% { opacity: 0; transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+
+        #timer { font-size: 4rem; font-weight: 300; letter-spacing: -2px; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        #live-sub { 
+            position: fixed; bottom: 15%; width: 90%; font-family: 'Playfair Display';
+            font-size: 1.4rem; color: var(--gold); font-style: italic; opacity: 0; 
+            transition: 0.8s; text-shadow: 0 0 10px rgba(255,255,255,0.2); text-align: center; left: 5%;
+        }
+
+        /* Mektup Tasarımı */
+        .envelope {
+            width: 200px; height: 130px; background: #c5c5c5; position: relative;
+            cursor: pointer; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .envelope:after {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 0; height: 0; border-left: 100px solid transparent;
+            border-right: 100px solid transparent; border-top: 70px solid #dcdcdc;
+        }
+        .letter-content {
+            background: #fff; color: #333; padding: 25px; border-radius: 8px;
+            font-family: 'Playfair Display'; font-size: 1.05rem; line-height: 1.6;
+            width: 85%; max-width: 320px; display: none; border: 1px solid var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Wrapped Kartları */
+        .wrapped-card {
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 40px; width: 85%; max-width: 350px; opacity: 0;
+            position: absolute; transform: translateY(30px); transition: 0.8s;
+        }
+        .wrapped-card.show { opacity: 1; transform: translateY(0); }
+        .wrapped-val { font-size: 3.5rem; font-weight: 600; color: var(--gold); margin: 15px 0; display: block; }
+
+        .btn {
+            padding: 16px 40px; border-radius: 50px; border: none; cursor: pointer;
+            font-weight: 600; font-size: 1rem; transition: 0.3s;
+        }
+        #btn-yes { background: var(--white); color: #000; z-index: 100; }
+        #btn-no { 
+            background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.3); 
+            position: absolute; transition: 0.1s linear; touch-action: none;
+        }
+
+        #entry-gate { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        #admin-panel { 
+            position: fixed; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.9);
+            padding: 10px; z-index: 2000; display: none; font-size: 12px; border-bottom: 1px solid var(--red);
+        }
+    </style>
+</head>
+<body>
+
+<div id="entry-gate">
+    <button class="btn" onclick="initApp()" style="background: var(--red); color: #fff;">Sürprizi Başlat ✨</button>
+</div>
+
+<div id="admin-panel">
+    <input type="text" id="admin-input" placeholder="Canlı mesaj...">
+    <button onclick="sendSub()">Gönder</button>
+    <button onclick="db.ref('testUnlock').set(Date.now())" style="background:var(--gold)">Kilidi Aç</button>
+</div>
+
+<div class="bg-overlay"></div>
+<canvas id="snow"></canvas>
+<div id="live-sub"></div>
+
+<section id="s-count" class="scene active">
+    <p style="letter-spacing: 5px; opacity: 0.5; margin-bottom: 20px;">YENİ YILA KALAN</p>
+    <div id="timer">00:00:00</div>
+</section>
+
+<section id="s-letter" class="scene">
+    <div class="envelope" id="env" onclick="openLetter()"></div>
+    <div id="let-paper" class="letter-content" onclick="goToWrapped()">
+        Yeni yılın kutlu olsun bitanem. İyi ki o gün Aleyna bana "yaz" dedi, iyi ki o gün sana yazdım ve iyi ki sen bana cevap verdin. O günden beri aklım, kalbim hep seni düşünüyor; her günüm daha güzel geçiyor. İyi ki varsın... <br><br> <small>(Devam etmek için dokun)</small>
+    </div>
+    <p id="env-hint" style="margin-top:40px; opacity:0.6; font-style:italic;">Bir mektubun var, dokunup aç...</p>
+</section>
+
+<section id="s-wrapped" class="scene"></section>
+
+<section id="s-prop" class="scene">
+    <h2 style="font-family:'Playfair Display'; font-size:1.8rem; margin-bottom:40px; line-height:1.4;">Herkes yeni yıla...<br><span style="color:var(--gold)">Sen yıllarıma girmek ister misin?</span></h2>
+    <div id="btn-container" style="position:relative; height:300px; width:100%; display:flex; justify-content:center; align-items:center;">
+        <button id="btn-yes" class="btn" onclick="finalStep()">EVET</button>
+        <button id="btn-no" class="btn">Hayır</button>
+    </div>
+</section>
+
+<section id="s-final" class="scene">
+    <h1 style="font-size: 5rem; margin-bottom:20px;">❤️</h1>
+    <h2 style="font-family:'Playfair Display'; font-size:1.3rem; line-height:1.8; padding: 0 20px;">SENİ ÇOOOOOK SEVİYORUMM İYİ Kİ VARSIN BALIM, BİTANEM, GÜZELİM, TAVŞANIMMM</h2>
+</section>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBwa-t-_rUBabzgDB5Ih5PCK8e2Ki3AarM",
+        authDomain: "sunucu-dd652.firebaseapp.com",
+        databaseURL: "https://sunucu-dd652-default-rtdb.firebaseio.com",
+        projectId: "sunucu-dd652",
+        storageBucket: "sunucu-dd652.firebasestorage.app",
+        messagingSenderId: "487547465982",
+        appId: "1:487547465982:web:f12f462aab224d01a775af"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let isStarted = false;
+    // BİTİŞ TARİHİ: 1 OCAK 2026 00:00
+    let targetDate = new Date("Jan 1, 2026 00:00:00");
+
+    function initApp() {
+        document.getElementById('entry-gate').style.opacity = '0';
+        setTimeout(() => document.getElementById('entry-gate').style.display = 'none', 500);
+        isStarted = true;
+        initSnow();
+    }
+
+    if(window.location.search.includes('admin=1')) document.getElementById('admin-panel').style.display = 'block';
+
+    db.ref('liveMsg').on('value', snap => {
+        const txt = snap.val();
+        const el = document.getElementById('live-sub');
+        if(txt) { el.innerText = txt; el.style.opacity = 1; setTimeout(() => el.style.opacity = 0, 5000); }
+    });
+    function sendSub() { db.ref('liveMsg').set(document.getElementById('admin-input').value); }
+    db.ref('testUnlock').on('value', s => { if(s.exists()) targetDate = new Date(); });
+
+    setInterval(() => {
+        if(!isStarted) return;
+        const diff = targetDate - new Date();
+        if(diff <= 0) {
+            if(document.getElementById('s-count').classList.contains('active')) changeScene('s-count', 's-letter');
+        } else {
+            const h = Math.floor(diff/3600000).toString().padStart(2,'0');
+            const m = Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
+            const s = Math.floor((diff%60000)/1000).toString().padStart(2,'0');
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+        }
+    }, 1000);
+
+    function changeScene(oldId, newId) {
+        document.getElementById(oldId).classList.remove('active');
+        setTimeout(() => {
+            document.getElementById(newId).classList.add('active');
+            if(newId === 's-wrapped') runWrapped();
+        }, 800);
+    }
+
+    function openLetter() {
+        document.getElementById('env').style.display = 'none';
+        document.getElementById('env-hint').style.display = 'none';
+        document.getElementById('let-paper').style.display = 'block';
+    }
+
+    function goToWrapped() { changeScene('s-letter', 's-wrapped'); }
+
+    function runWrapped() {
+        // BAŞLANGIÇ TARİHİ: 7 KASIM 2025
+        const start = new Date("2025-11-07");
+        const days = Math.max(0, Math.floor((new Date() - start) / (1000 * 60 * 60 * 24)));
+
+        const content = [
+            ["Her şey bir mesajla başladı...", "✨"],
+            ["7 Kasım’dan beri kalbimde yerin git gide yükselmekte", "📈"],
+            ["Seninle geçen gün sayısı:", days],
+            ["Aklımdan çıkmadığın an:", "%0", "(Kalan %100 sensin)"],
+            ["Konuşmadan durduğumuz gün:", "0"],
+            ["Gülüşümü tetikleme oranı:", "%100"],
+            ["En güzel alışkanlığım:", "Sana yazmak"],
+            ["En çok düşündüğüm kişi:", "Sensin"],
+            ["2025’in bana getirdiği en güzel şey...", "❤️"],
+            ["Yeni yılı seninle karşılamak", "🎄"]
+        ];
+
+        let idx = 0;
+        const container = document.getElementById('s-wrapped');
+
+        function showNext() {
+            if(idx >= content.length) {
+                setTimeout(() => {
+                    container.innerHTML = `<h2 style="font-family:'Playfair Display'; opacity:0; transition:2s;" id="bridge-txt">Bazı hikâyeler bitmez...<br><br>sadece yeni bir yıla girer.</h2>`;
+                    document.getElementById('bridge-txt').style.opacity = 1;
+                    setTimeout(() => changeScene('s-wrapped', 's-prop'), 4000);
+                }, 1000);
+                return;
+            }
+            container.innerHTML = `<div class="wrapped-card" id="wc">
+                <p style="text-transform:uppercase; letter-spacing:3px; opacity:0.6; font-size:0.7rem;">RECAP</p>
+                <h3 style="margin-top:20px; font-weight:400;">${content[idx][0]}</h3>
+                <span class="wrapped-val">${content[idx][1]}</span>
+                ${content[idx][2] ? `<p style="opacity:0.5">${content[idx][2]}</p>` : ''}
+            </div>`;
+            setTimeout(() => document.getElementById('wc').classList.add('show'), 100);
+            setTimeout(() => { document.getElementById('wc').classList.remove('show'); idx++; setTimeout(showNext, 800); }, 3500);
+        }
+        showNext();
+    }
+
+    // Hayır Butonu Kaçış Mekanizması (Mobil ve Masaüstü Uyumlu)
+    const btnNo = document.getElementById('btn-no');
+    const moveBtn = (e) => {
+        const x = Math.random() * (window.innerWidth - btnNo.offsetWidth - 20);
+        const y = Math.random() * (window.innerHeight - btnNo.offsetHeight - 20);
+        btnNo.style.left = x + 'px';
+        btnNo.style.top = y + 'px';
+    };
+    btnNo.addEventListener('touchstart', (e) => { e.preventDefault(); moveBtn(); });
+    btnNo.addEventListener('mouseover', moveBtn);
+
+    function finalStep() { changeScene('s-prop', 's-final'); }
+
+    function initSnow() {
+        const canvas = document.getElementById('snow');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const flakes = [];
+        for(let i=0; i<150; i++) flakes.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*3+1, d: Math.random()+0.5});
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.beginPath();
+            flakes.forEach(f => {
+                ctx.moveTo(f.x, f.y);
+                ctx.arc(f.x, f.y, f.r, 0, Math.PI*2, true);
+                f.y += f.d; f.x += Math.sin(f.y/50);
+                if(f.y > canvas.height) f.y = -10;
+            });
+            ctx.fill();
+            requestAnimationFrame(draw);
+        }
+        draw();
+    }
+</script>
+</body>
+</html>
