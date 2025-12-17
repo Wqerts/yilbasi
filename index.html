@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sadece Senin İçin</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@1,600&display=swap');
+
+:root {
+    --red:#8e0e0e;
+    --gold:#d4af37;
+    --white:#f8f9fa;
+    --bg:#050508;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+body{
+    background:var(--bg);
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+    height:100vh;
+    width:100vw;
+    overflow:hidden;
+    position:fixed;
+    padding-bottom:env(safe-area-inset-bottom);
+}
+
+.bg-overlay{
+    position:fixed;
+    inset:0;
+    background:radial-gradient(circle,#1a0b0b 0%,#050508 100%);
+    z-index:-2;
+    animation:bgPulse 10s infinite alternate;
+}
+@keyframes bgPulse{0%{opacity:.7}100%{opacity:1}}
+
+canvas{position:fixed;inset:0;pointer-events:none}
+#snow{z-index:1}
+#confetti{z-index:200}
+
+.scene{
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:30px;
+    z-index:10;
+}
+.scene.active{display:flex;animation:sceneFade 1.5s ease forwards}
+@keyframes sceneFade{from{opacity:0;transform:scale(1.05)}to{opacity:1}}
+
+#timer{font-size:4rem;font-weight:300;color:var(--gold)}
+
+.envelope{
+    width:200px;
+    height:130px;
+    background:#c5c5c5;
+    position:relative;
+    cursor:pointer;
+    transition:.6s;
+}
+.envelope:after{
+    content:'';
+    position:absolute;
+    top:0;left:0;
+    border-left:100px solid transparent;
+    border-right:100px solid transparent;
+    border-top:70px solid #dcdcdc;
+}
+.envelope.open{transform:scale(.8) rotateX(40deg)}
+
+.letter-content{
+    display:none;
+    background:#fff;
+    color:#333;
+    padding:25px;
+    border-radius:8px;
+    font-family:'Playfair Display';
+    width:85%;
+    max-width:320px;
+    border:1px solid var(--gold);
+    animation:letterIn 1s forwards;
+}
+@keyframes letterIn{from{opacity:0;transform:translateY(40px)}to{opacity:1}}
+
+.wrapped-card{
+    background:rgba(255,255,255,.05);
+    backdrop-filter:blur(15px);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:20px;
+    padding:40px;
+    width:85%;
+    max-width:350px;
+}
+.wrapped-val{
+    font-size:3rem;
+    color:var(--gold);
+    margin-top:20px;
+    display:block;
+}
+
+.btn{
+    padding:16px 40px;
+    border-radius:50px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+}
+
+#btn-no{
+    position:fixed;
+    left:50%;
+    top:70%;
+    transform:translate(-50%,-50%);
+    background:transparent;
+    color:white;
+    border:1px solid rgba(255,255,255,.3);
+    z-index:1000;
+}
+
+#entry-gate{
+    position:fixed;
+    inset:0;
+    background:black;
+    z-index:10000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#s-final h1{animation:pulse 1.2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+</style>
+</head>
+
+<body>
+
+<div id="entry-gate">
+    <button class="btn" style="background:var(--red);color:white" onclick="initApp()">Sürprizi Başlat ✨</button>
+</div>
+
+<div class="bg-overlay"></div>
+<canvas id="snow"></canvas>
+<canvas id="confetti"></canvas>
+
+<audio id="bg-music" src="music.mp3" loop></audio>
+
+<section id="s-count" class="scene active">
+    <p style="opacity:.5;margin-bottom:20px">YENİ YILA KALAN</p>
+    <div id="timer">00:00:00</div>
+</section>
+
+<section id="s-letter" class="scene">
+    <div class="envelope" id="env" onclick="openLetter()"></div>
+    <div class="letter-content" id="let-paper" onclick="changeScene('s-letter','s-wrapped')">
+        Yeni yılın kutlu olsun bitanem…  
+        İyi ki sana yazdım, iyi ki sen bana cevap verdin.  
+        İyi ki varsın ❤️  
+        <br><br><small>(Devam etmek için dokun)</small>
+    </div>
+</section>
+
+<section id="s-wrapped" class="scene"></section>
+
+<section id="s-prop" class="scene">
+    <h2 style="font-family:'Playfair Display'">
+        Sen yıllarıma girmek ister misin?
+    </h2><br>
+    <button class="btn" onclick="changeScene('s-prop','s-final')" style="background:white;color:black">EVET</button>
+    <button id="btn-no" class="btn">Hayır</button>
+</section>
+
+<section id="s-final" class="scene">
+    <h1>❤️</h1>
+    <h2 style="font-family:'Playfair Display'">
+        SENİ ÇOOOOOK SEVİYORUM<br>
+        İYİ Kİ VARSIN ❤️
+    </h2>
+</section>
+
+<script>
+const firebaseConfig={
+    apiKey:"AIzaSyBwa-t-_rUBabzgDB5Ih5PCK8e2Ki3AarM",
+    databaseURL:"https://sunucu-dd652-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+
+let targetDate=new Date("2026-01-01T00:00:00").getTime();
+let started=false,locked=false;
+
+function initApp(){
+    document.getElementById('entry-gate').style.display='none';
+    started=true;
+    initSnow();
+    playMusic();
+}
+
+setInterval(()=>{
+    if(!started) return;
+    const diff=targetDate-Date.now();
+    if(diff<=0){
+        launchConfetti();
+        changeScene('s-count','s-letter');
+    }else{
+        const h=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+        const m=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+        const s=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+        timer.innerText=`${h}:${m}:${s}`;
+    }
+},1000);
+
+function changeScene(a,b){
+    if(locked) return;
+    locked=true;
+    document.getElementById(a).classList.remove('active');
+    setTimeout(()=>{
+        document.getElementById(b).classList.add('active');
+        if(b==='s-wrapped') runWrapped();
+        locked=false;
+    },800);
+}
+
+function openLetter(){
+    env.classList.add('open');
+    setTimeout(()=>{
+        env.style.display='none';
+        letPaper.style.display='block';
+    },700);
+}
+
+function runWrapped(){
+    const start=new Date("2025-11-07");
+    const days=Math.floor((Date.now()-start)/86400000);
+    const data=[
+        ["Bir mesajla başlayan hikâye","✨"],
+        ["Seninle geçen gün sayısı",days],
+        ["Gülüşümü tetikleme oranı","%100"],
+        ["En güzel alışkanlığım","Sana yazmak"],
+        ["2025’in en güzeli","❤️"]
+    ];
+    let i=0;
+    const c=sWrapped;
+    function next(){
+        if(i>=data.length){
+            setTimeout(()=>changeScene('s-wrapped','s-prop'),4000);
+            return;
+        }
+        c.innerHTML=`<div class="wrapped-card">
+            <h3>${data[i][0]}</h3>
+            <span class="wrapped-val">${data[i][1]}</span>
+        </div>`;
+        i++;
+        setTimeout(next,3500);
+    }
+    next();
+}
+
+btnNo.onmouseover=btnNo.ontouchstart=()=>{
+    btnNo.style.left=Math.random()*(innerWidth-120)+'px';
+    btnNo.style.top=Math.random()*(innerHeight-60)+'px';
+};
+
+function playMusic(){
+    const m=document.getElementById('bg-music');
+    m.volume=0;
+    m.play();
+    const f=setInterval(()=>{m.volume<.5?m.volume+=.02:clearInterval(f)},200);
+}
+
+function launchConfetti(){
+    const c=confetti,ctx=c.getContext('2d');
+    c.width=innerWidth;c.height=innerHeight;
+    const p=Array.from({length:180},()=>({
+        x:Math.random()*c.width,
+        y:Math.random()*-c.height,
+        r:Math.random()*6+4,
+        d:Math.random()*5+3,
+        c:`hsl(${Math.random()*360},100%,70%)`
+    }));
+    (function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        p.forEach(e=>{
+            ctx.fillStyle=e.c;
+            ctx.beginPath();
+            ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+            ctx.fill();
+            e.y+=e.d;
+        });
+        requestAnimationFrame(draw);
+    })();
+}
+
+function initSnow(){
+    const c=snow,ctx=c.getContext('2d');
+    c.width=innerWidth;c.height=innerHeight;
+    const f=Array.from({length:150},()=>({
+        x:Math.random()*c.width,
+        y:Math.random()*c.height,
+        r:Math.random()*3+1,
+        d:Math.random()+.5
+    }));
+    (function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        ctx.fillStyle="white";
+        ctx.beginPath();
+        f.forEach(e=>{
+            ctx.moveTo(e.x,e.y);
+            ctx.arc(e.x,e.y,e.r,0,Math.PI*2);
+            e.y+=e.d;
+            if(e.y>c.height)e.y=-10;
+        });
+        ctx.fill();
+        requestAnimationFrame(draw);
+    })();
+}
+</script>
+</body>
+</html>
