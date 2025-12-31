@@ -23,6 +23,10 @@
         .btn { padding: 16px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
         #btn-no { position: fixed; background: transparent; color: white; border: 1px solid rgba(255,255,255,.3); z-index: 1000; }
         #entry-gate { position: fixed; inset: 0; background: black; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        
+        /* Admin Panel Tasarımı */
+        #admin-panel { position: fixed; inset: 0; background: #fff; color: #000; z-index: 99999; display: none; padding: 20px; overflow-y: auto; }
+        .admin-item { border-bottom: 1px solid #eee; padding: 15px; font-size: 1rem; color: #333; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
 </head>
@@ -88,8 +92,13 @@
     </h2>
 </section>
 
+<div id="admin-panel">
+    <h2 style="margin-bottom:20px; border-bottom:2px solid #red; padding-bottom:10px;">Gelen Cevaplar</h2>
+    <div id="admin-list">Veriler yükleniyor...</div>
+    <button onclick="location.href=location.pathname" style="margin-top:20px; padding:10px;">Siteden Çık</button>
+</div>
+
 <script>
-    // Firebase Ayarları
     const firebaseConfig = {
         apiKey: "AIzaSyBwa-t-_rUBabzgDB5Ih5PCK8e2Ki3AarM",
         authDomain: "sunucu-dd652.firebaseapp.com",
@@ -101,6 +110,24 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+
+    // URL Kontrolü ( ?admin=1 var mı bakar )
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin') === '1') {
+        document.getElementById('admin-panel').style.display = 'block';
+        loadAnswers();
+    }
+
+    function loadAnswers() {
+        db.ref('cevaplar').on('value', (snap) => {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = "";
+            snap.forEach((child) => {
+                const data = child.val();
+                list.innerHTML += `<div class="admin-item"><b>Cevap:</b> ${data.cevap} <br> <small>Zaman: ${data.tarih}</small></div>`;
+            });
+        });
+    }
 
     let targetDate = new Date("2026-01-01T00:00:00").getTime();
     let letterStep = 0;
@@ -117,10 +144,10 @@
 
     function finalYes() {
         const music = document.getElementById('love-music');
-        music.play().catch(e => console.log("Müzik için etkileşim gerekiyor."));
+        music.play().catch(e => console.log("Müzik için etkileşim lazım."));
         launchConfetti();
         changeScene('s-prop', 's-final');
-        db.ref('cevaplar').push({ cevap: "EVET!", tarih: Date.now() });
+        db.ref('cevaplar').push({ cevap: "EVET!", tarih: new Date().toLocaleString('tr-TR') });
     }
 
     setInterval(() => {
@@ -217,7 +244,6 @@
             o.style.display = 'none';
             n.style.display = 'flex';
             setTimeout(() => n.classList.add('active'), 100);
-            if(newS === 's-letter' && letterStep === 0) handleLetterClick();
         }, 2000);
     }
 
