@@ -13,45 +13,29 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--white); font-family: 'Inter', sans-serif; height: 100vh; width: 100vw; overflow: hidden; position: fixed; }
         
-        /* Arka Plan */
         .bg-overlay { position: fixed; inset: 0; background: radial-gradient(circle, #1a0b0b 0%, #050508 100%); z-index: -2; }
         canvas { position: fixed; inset: 0; pointer-events: none; }
-        #snow { z-index: 1; }
-        #confetti { z-index: 5; }
-
-        /* Sahne Yapısı */
-        .scene { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; z-index: 10; opacity: 0; transition: opacity 1.5s ease; }
+        
+        .scene { position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; z-index: 10; opacity: 0; transition: opacity 1.2s ease; }
         .scene.active { display: flex; opacity: 1; }
 
-        /* Yazılar */
-        #timer { font-size: 3.5rem; font-weight: 300; color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.3); }
+        #timer { font-size: 3.5rem; font-weight: 300; color: var(--gold); }
         .fade-text { font-family: 'Playfair Display'; font-size: 1.4rem; color: var(--gold); transition: opacity 1s; opacity: 0; }
 
-        /* Zarf ve Mektup */
-        .envelope-wrapper { position: relative; cursor: pointer; transition: 0.8s; }
-        .envelope { width: 160px; height: 110px; background: #dcdcdc; position: relative; border-radius: 0 0 5px 5px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .envelope::before { content: ''; position: absolute; top: 0; left: 0; border-left: 80px solid transparent; border-right: 80px solid transparent; border-top: 60px solid #f2f2f2; z-index: 2; transform-origin: top; }
-        .letter-content { display: none; background: #fff; color: #333; padding: 25px; border-radius: 8px; font-family: 'Playfair Display'; width: 90%; max-width: 320px; border: 1px solid var(--gold); box-shadow: 0 20px 50px rgba(0,0,0,0.6); line-height: 1.7; z-index: 5; animation: cardIn 1s ease forwards; }
+        .letter-content { display: none; background: #fff; color: #333; padding: 25px; border-radius: 8px; font-family: 'Playfair Display'; width: 90%; max-width: 320px; border: 1px solid var(--gold); box-shadow: 0 20px 50px rgba(0,0,0,0.6); line-height: 1.6; z-index: 5; animation: cardIn 0.8s ease forwards; }
 
-        /* Wrapped Kartları */
-        .wrapped-card { background: rgba(255, 255, 255, .05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 40px; width: 85%; max-width: 350px; animation: cardIn 1s ease-out forwards; }
-        @keyframes cardIn { from { opacity: 0; transform: translateY(30px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .wrapped-val { font-size: 2.8rem; color: var(--gold); margin-top: 20px; display: block; font-weight: 600; }
+        .wrapped-card { background: rgba(255, 255, 255, .05); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 35px; width: 85%; max-width: 350px; animation: cardIn 0.6s ease-out forwards; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .wrapped-val { font-size: 2.2rem; color: var(--gold); margin-top: 15px; display: block; font-weight: 600; }
 
-        /* Butonlar */
         .btn { padding: 16px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
-        #btn-no { position: fixed; background: transparent; color: white; border: 1px solid rgba(255,255,255,.3); z-index: 1000; }
+        #btn-no { position: fixed; background: transparent; color: white; border: 1px solid rgba(255,255,255,.3); }
         #entry-gate { position: fixed; inset: 0; background: black; z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        #admin-panel { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,.9); padding: 10px; z-index: 20000; display: none; text-align: center; }
     </style>
 </head>
 <body>
 
 <audio id="bg-music" loop><source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808f3030e.mp3" type="audio/mpeg"></audio>
-
-<div id="admin-panel">
-    <button class="btn" style="background:var(--gold); padding:8px 15px; color:black;" onclick="forceUnlock()">Önizlemeyi Başlat</button>
-</div>
 
 <div id="entry-gate">
     <button class="btn" style="background:var(--red); color:white" onclick="initApp()">Sana Bir Sürprizim Var ✨</button>
@@ -71,37 +55,32 @@
 </section>
 
 <section id="s-letter" class="scene">
-    <div class="envelope-wrapper" id="env-wrap" onclick="openLetter()">
-        <div class="envelope"></div>
-    </div>
-    <div class="letter-content" id="let-paper" onclick="changeScene('s-letter','s-wrapped')">
+    <div class="letter-content" id="let-paper" style="display:block" onclick="changeScene('s-letter','s-wrapped')">
         Yeni yılın kutlu olsun bitanem…<br><br>
-       İyiki o gün Aleyna bana yaz dedi ve ben sana yazdım Ve iyiki konuşmaya başladık senle konuşmaya başladığımızdan beri sana olan SEVGİM Kat ve Kat artıyor Seni Çoook seviyorum<br><br>
+        İyiki aleyna bana yaz demiş iyiki yazmışım iyiki şuan konuşuyoruz İyiki varsın seni çooook seviyorummmm bitanemm<br><br>
+        İyi ki varsın ❤️<br><br>
         <small style="color:var(--gold)">(Devam etmek için dokun)</small>
     </div>
-    <p id="hint-text" style="margin-top:40px; opacity:0.5; font-style:italic;">Sana bir mektup bıraktım, dokunup aç...</p>
 </section>
 
 <section id="s-wrapped" class="scene"></section>
 
 <section id="s-prop" class="scene">
-    <h2 style="font-family:'Playfair Display'; font-size: 1.8rem; line-height: 1.4;">
+    <h2 style="font-family:'Playfair Display'; font-size: 1.8rem;">
         Herkes yeni yıla giriyor...<br>
         <span style="color:var(--gold)">Peki sen benim yıllarıma girmek ister misin? <br>Yani benimle ÇIKAR MISIN?</span>
     </h2>
-    <p style="font-size: 0.8rem; opacity: 0.7; font-style: italic; margin-top: 15px; padding: 0 20px; line-height: 1.5; color: var(--white);">
+    <p style="font-size: 0.8rem; opacity: 0.7; font-style: italic; margin-top: 15px; padding: 0 20px; color: var(--white);">
         (Aslında bu teklifi yüz yüze etmeyi düşünüyordum ama YILBAŞI gününün tatil olduğunu unutmuşum, yüz yüze teklifi telafi edeceğim :) )
     </p>
     <br>
-    <div style="display: flex; gap: 10px; flex-direction: column; align-items: center; width: 100%;">
-        <button class="btn" style="background:white; color:black; width: 220px;" onclick="handleFinalYes()">EVET</button>
-        <button id="btn-no" class="btn" style="width: 220px;">Hayır</button>
-    </div>
+    <button class="btn" style="background:white; color:black; width: 220px;" onclick="handleFinalYes()">EVET</button>
+    <button id="btn-no" class="btn" style="width: 220px; margin-top:10px;">Hayır</button>
 </section>
 
 <section id="s-final" class="scene">
     <h1 style="font-size: 5rem; margin-bottom: 20px;">❤️</h1>
-    <h2 style="font-family:'Playfair Display';">SENİ ÇOOOOOOOK SEVİYORUM İYİKİ VARSIN BALIMMMM BİTANEMMM HERŞEYİMM GÜZELİMMMM</h2>
+    <h2>SENİ COOOOOOOOOK SEVİYORUMMMMMM BİTANEMMMMMMM BALİMMMMM HERSEYİMMM GÜZELİMMMMM</h2>
 </section>
 
 <script>
@@ -112,13 +91,9 @@
     let started = false, timerFinished = false;
     let targetDate = new Date("2026-01-01T00:00:00").getTime();
 
-    if (location.search.includes('admin=1')) document.getElementById('admin-panel').style.display = 'block';
-    function forceUnlock() { db.ref('forceUnlock').set(Date.now()); }
-    db.ref('forceUnlock').on('value', snap => { if (snap.exists()) targetDate = Date.now(); });
-
     function initApp() {
         document.getElementById('entry-gate').style.display = 'none';
-        document.getElementById('bg-music').play().catch(e => console.log("Müzik için etkileşim bekliyor"));
+        document.getElementById('bg-music').play().catch(() => {});
         started = true;
         initSnow();
     }
@@ -128,9 +103,8 @@
         const diff = targetDate - Date.now();
         if (diff <= 0) {
             timerFinished = true;
-            document.getElementById('timer').textContent = "00:00:00";
             launchConfetti();
-            setTimeout(() => runBridge(), 2500);
+            setTimeout(() => runBridge(), 2000);
         } else {
             const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
             const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
@@ -141,46 +115,42 @@
 
     function runBridge() {
         changeScene('s-count', 's-bridge');
-        const lines = ["Biliyorum, her şey bir mesajla başladı...", "Sana söylemek istediğim çok şey var.", "Önce bu mektubu oku..."];
+        const lines = ["Yılın son dakikaları...", "Seninle geçen her an çok değerli.", "Şimdi küçük bir yolculuğa çıkalım.", "Önce bu mektuba bak..."];
         let i = 0;
         const textEl = document.getElementById('bridge-text');
         function showLine() {
             if (i >= lines.length) { setTimeout(() => changeScene('s-bridge', 's-letter'), 1000); return; }
-            textEl.innerText = lines[i];
-            textEl.style.opacity = 1;
+            textEl.innerText = lines[i]; textEl.style.opacity = 1;
             setTimeout(() => { textEl.style.opacity = 0; i++; setTimeout(showLine, 1000); }, 3000);
         }
         showLine();
     }
 
-    function openLetter() {
-        document.getElementById('env-wrap').style.display = 'none';
-        document.getElementById('hint-text').style.display = 'none';
-        document.getElementById('let-paper').style.display = 'block';
-    }
-
     function runWrapped() {
         const days = Math.floor((Date.now() - new Date("2025-11-07")) / 86400000);
         const data = [
-            ["Her şeyin başladığı o gün", "7 Kasım ✨"],
-            ["Birlikte geçen", days + " Gün"],
-            ["Kalbimin mutluluk oranı", "%100"],
-            ["2025'in bana en büyük hediyesi", "Sensin ❤️"]
+            ["Her Şeyin Başladığı Gün", "7 Kasım ✨"],
+            ["Birlikte Geçirdiğimiz", days + " Gün"],
+            ["Mutluluk Oranımız", "%100"],
+            ["En Sevdiğim Tarih", "7.11.2025"],
+            ["Seninle Geçen Her Saniye", "Paha Biçilemez"],
+            ["Bu Yılın En Güzel Olayı", "Seni Tanımak"],
+            ["Kalbimdeki Yerin", "Sonsuz"],
+            ["İyi Ki Tanışmışız", "Diyoruz"],
+            ["2025'in En Tatlı Anısı", "Bizim Hikayemiz"],
+            ["Şimdi Yeni Bir Yıla", "Hazır mısın? ❤️"]
         ];
         let idx = 0;
         const sw = document.getElementById('s-wrapped');
         function nextCard() {
-            if (idx >= data.length) {
-                changeScene('s-wrapped', 's-prop');
-                return;
-            }
+            if (idx >= data.length) { changeScene('s-wrapped', 's-prop'); return; }
             sw.innerHTML = `<div class="wrapped-card">
-                <p style="opacity:0.5; font-size:0.7rem; letter-spacing:2px;">BİRLİKTE</p>
-                <h3 style="margin:20px 0; font-weight:400;">${data[idx][0]}</h3>
+                <p style="opacity:0.5; font-size:0.7rem; letter-spacing:2px;">BIZIM 2025</p>
+                <h3 style="margin:20px 0; font-weight:400; color:white;">${data[idx][0]}</h3>
                 <span class="wrapped-val">${data[idx][1]}</span>
             </div>`;
             idx++;
-            setTimeout(nextCard, 4000);
+            setTimeout(nextCard, 3500);
         }
         nextCard();
     }
@@ -192,7 +162,7 @@
             document.getElementById(b).style.display = 'flex';
             setTimeout(() => document.getElementById(b).classList.add('active'), 100);
             if(b === 's-wrapped') runWrapped();
-        }, 1500);
+        }, 1200);
     }
 
     function handleFinalYes() {
@@ -227,6 +197,7 @@
 
     const btnNo = document.getElementById('btn-no');
     btnNo.onmouseover = () => {
+        btnNo.style.position = 'fixed';
         btnNo.style.left = Math.random() * (window.innerWidth - 120) + 'px';
         btnNo.style.top = Math.random() * (window.innerHeight - 60) + 'px';
     };
