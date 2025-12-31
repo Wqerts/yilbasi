@@ -23,14 +23,13 @@
         .btn { padding: 16px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
         #btn-no { position: fixed; background: transparent; color: white; border: 1px solid rgba(255,255,255,.3); z-index: 1000; }
         #entry-gate { position: fixed; inset: 0; background: black; z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        
-        /* Admin Panel Tasarımı */
-        #admin-panel { position: fixed; inset: 0; background: #fff; color: #000; z-index: 99999; display: none; padding: 20px; overflow-y: auto; }
-        .admin-item { border-bottom: 1px solid #eee; padding: 15px; font-size: 1rem; color: #333; }
         @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        #preview-badge { position: fixed; top: 10px; left: 10px; background: rgba(255,0,0,0.5); padding: 5px 10px; border-radius: 5px; font-size: 10px; z-index: 99999; display: none; }
     </style>
 </head>
 <body>
+
+<div id="preview-badge">ÖNİZLEME MODU AKTİF</div>
 
 <audio id="love-music" loop>
     <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808f3030e.mp3" type="audio/mpeg">
@@ -92,12 +91,6 @@
     </h2>
 </section>
 
-<div id="admin-panel">
-    <h2 style="margin-bottom:20px; border-bottom:2px solid #red; padding-bottom:10px;">Gelen Cevaplar</h2>
-    <div id="admin-list">Veriler yükleniyor...</div>
-    <button onclick="location.href=location.pathname" style="margin-top:20px; padding:10px;">Siteden Çık</button>
-</div>
-
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyBwa-t-_rUBabzgDB5Ih5PCK8e2Ki3AarM",
@@ -111,23 +104,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // URL Kontrolü ( ?admin=1 var mı bakar )
+    // ADMIN ÖNİZLEME KONTROLÜ
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('admin') === '1') {
-        document.getElementById('admin-panel').style.display = 'block';
-        loadAnswers();
-    }
-
-    function loadAnswers() {
-        db.ref('cevaplar').on('value', (snap) => {
-            const list = document.getElementById('admin-list');
-            list.innerHTML = "";
-            snap.forEach((child) => {
-                const data = child.val();
-                list.innerHTML += `<div class="admin-item"><b>Cevap:</b> ${data.cevap} <br> <small>Zaman: ${data.tarih}</small></div>`;
-            });
-        });
-    }
+    const isPreview = urlParams.get('admin') === '1';
+    if(isPreview) document.getElementById('preview-badge').style.display = 'block';
 
     let targetDate = new Date("2026-01-01T00:00:00").getTime();
     let letterStep = 0;
@@ -144,15 +124,16 @@
 
     function finalYes() {
         const music = document.getElementById('love-music');
-        music.play().catch(e => console.log("Müzik için etkileşim lazım."));
+        music.play().catch(e => console.log("Müzik hatası"));
         launchConfetti();
         changeScene('s-prop', 's-final');
         db.ref('cevaplar').push({ cevap: "EVET!", tarih: new Date().toLocaleString('tr-TR') });
     }
 
     setInterval(() => {
-        const diff = targetDate - Date.now();
+        const diff = isPreview ? 0 : targetDate - Date.now(); // Adminse diff direkt 0
         const timerEl = document.getElementById('timer');
+        
         if (diff <= 0) {
             timerEl.textContent = "00:00:00";
             if (document.getElementById('s-count').classList.contains('active')) {
@@ -164,14 +145,12 @@
             const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
             const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
             timerEl.textContent = `${h}:${m}:${s}`;
-            
             if (Date.now() % 4000 < 50) {
                 const subEl = document.getElementById('live-sub');
                 subEl.style.opacity = 0;
                 setTimeout(() => {
                     subEl.innerText = subs[subIdx % subs.length];
-                    subEl.style.opacity = 1;
-                    subIdx++;
+                    subEl.style.opacity = 1; subIdx++;
                 }, 800);
             }
         }
@@ -191,21 +170,12 @@
 
     function runBridge() {
         const texts = ["Bazı insanlar bir anda girer hayatına...", "Bazılarıysa kalır."];
-        let bIdx = 0;
-        const el = document.getElementById('bridge-text');
+        let bIdx = 0; const el = document.getElementById('bridge-text');
         function next() {
             if (bIdx < texts.length) {
                 el.style.opacity = 0;
-                setTimeout(() => {
-                    el.innerText = texts[bIdx];
-                    el.style.opacity = 1;
-                    bIdx++;
-                    setTimeout(next, 3500);
-                }, 1000);
-            } else {
-                changeScene('s-bridge', 's-wrapped');
-                runWrapped();
-            }
+                setTimeout(() => { el.innerText = texts[bIdx]; el.style.opacity = 1; bIdx++; setTimeout(next, 3500); }, 1000);
+            } else { changeScene('s-bridge', 's-wrapped'); runWrapped(); }
         }
         next();
     }
@@ -218,8 +188,7 @@
             {t: "En güzel alışkanlığım", v: "Sesin"},
             {t: "2025'in en güzel hediyesi", v: "Sana sarılmak"}
         ];
-        let idx = 0;
-        const sw = document.getElementById('s-wrapped');
+        let idx = 0; const sw = document.getElementById('s-wrapped');
         function step() {
             if (idx >= data.length) {
                 changeScene('s-wrapped', 's-silence');
@@ -229,22 +198,15 @@
             sw.innerHTML = data[idx].t === "BREAK" ? 
                 `<h2 style="font-family:'Playfair Display'; padding:30px;">${data[idx].v}</h2>` :
                 `<div class="wrapped-card"><p style="opacity:0.5; font-size:0.7rem;">HİKAYEMİZ</p><h3 style="margin:20px 0; font-weight:400;">${data[idx].t}</h3><span class="wrapped-val">${data[idx].v}</span></div>`;
-            idx++;
-            setTimeout(step, 4000);
+            idx++; setTimeout(step, 4000);
         }
         step();
     }
 
     function changeScene(oldS, newS) {
-        const o = document.getElementById(oldS);
-        const n = document.getElementById(newS);
-        if(!o || !n) return;
-        o.classList.remove('active');
-        setTimeout(() => {
-            o.style.display = 'none';
-            n.style.display = 'flex';
-            setTimeout(() => n.classList.add('active'), 100);
-        }, 2000);
+        const o = document.getElementById(oldS); const n = document.getElementById(newS);
+        if(!o || !n) return; o.classList.remove('active');
+        setTimeout(() => { o.style.display = 'none'; n.style.display = 'flex'; setTimeout(() => n.classList.add('active'), 100); }, 2000);
     }
 
     function initSnow() {
@@ -277,9 +239,7 @@
         btnNo.style.left = Math.random() * (window.innerWidth - 100) + 'px';
         btnNo.style.top = Math.random() * (window.innerHeight - 50) + 'px';
     };
-    btnNo.onmouseover = moveNo;
-    btnNo.addEventListener('touchstart', moveNo);
-
+    btnNo.onmouseover = moveNo; btnNo.addEventListener('touchstart', moveNo);
 </script>
 </body>
 </html>
