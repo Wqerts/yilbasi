@@ -31,11 +31,16 @@
         .btn { padding: 16px 40px; border-radius: 50px; border: none; cursor: pointer; font-weight: 600; transition: 0.3s; }
         #btn-no { position: fixed; background: transparent; color: white; border: 1px solid rgba(255,255,255,.3); }
         #entry-gate { position: fixed; inset: 0; background: black; z-index: 10000; display: flex; justify-content: center; align-items: center; }
+        #admin-panel { position: fixed; top: 0; width: 100%; background: rgba(0,0,0,.9); padding: 10px; z-index: 20000; display: none; text-align: center; }
     </style>
 </head>
 <body>
 
 <audio id="bg-music" loop><source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808f3030e.mp3" type="audio/mpeg"></audio>
+
+<div id="admin-panel">
+    <button class="btn" style="background:var(--gold); padding:8px 15px; color:black; font-size:0.8rem;" onclick="forceUnlock()">Önizlemeyi Başlat</button>
+</div>
 
 <div id="entry-gate">
     <button class="btn" style="background:var(--red); color:white" onclick="initApp()">Sana Bir Sürprizim Var ✨</button>
@@ -56,8 +61,8 @@
 
 <section id="s-letter" class="scene">
     <div class="letter-content" id="let-paper" style="display:block" onclick="changeScene('s-letter','s-wrapped')">
-        Yeni yılın kutlu olsun bitanem…<br><br>
-        İyiki aleyna bana yaz demiş iyiki yazmışım iyiki şuan konuşuyoruz İyiki varsın seni çooook seviyorummmm bitanemm<br><br>
+        Yeni yılın kutlulsun bitanem…<br><br>
+         İlk konuşmaya Başladığımız andan Beri Senı tanıyarak Sevgimi güclendirdim hemde Sana tutuldum Seni çok seviyorummm<br><br>
         İyi ki varsın ❤️<br><br>
         <small style="color:var(--gold)">(Devam etmek için dokun)</small>
     </div>
@@ -80,7 +85,7 @@
 
 <section id="s-final" class="scene">
     <h1 style="font-size: 5rem; margin-bottom: 20px;">❤️</h1>
-    <h2>SENİ COOOOOOOOOK SEVİYORUMMMMMM BİTANEMMMMMMM BALİMMMMM HERSEYİMMM GÜZELİMMMMM</h2>
+    <h2>SENİ ÇOOOOOOOOK SEVİYORUMMMM İYİKİ VARSİNNNN BALİMMM BİTANEMMM GÜZELİMMM HERŞEYİMMMMM</h2>
 </section>
 
 <script>
@@ -90,6 +95,19 @@
 
     let started = false, timerFinished = false;
     let targetDate = new Date("2026-01-01T00:00:00").getTime();
+
+    // Admin Menü Kontrolü
+    if (location.search.includes('admin=1')) document.getElementById('admin-panel').style.display = 'block';
+    
+    function forceUnlock() { 
+        db.ref('forceUnlock').set(Date.now()); 
+    }
+
+    db.ref('forceUnlock').on('value', snap => { 
+        if (snap.exists()) {
+            targetDate = Date.now(); 
+        }
+    });
 
     function initApp() {
         document.getElementById('entry-gate').style.display = 'none';
@@ -103,6 +121,7 @@
         const diff = targetDate - Date.now();
         if (diff <= 0) {
             timerFinished = true;
+            document.getElementById('timer').textContent = "00:00:00";
             launchConfetti();
             setTimeout(() => runBridge(), 2000);
         } else {
@@ -204,3 +223,4 @@
 </script>
 </body>
 </html>
+
